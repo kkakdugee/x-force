@@ -1,10 +1,19 @@
 MASTER_CSV_COLUMNS = ["title",
+                      "journal",
                       "authors",
-                      "schools",
-                      "countries",
-                      "year of publication",
-                      "abstract text",
+                      "doi",
+                      "published",
+                      "abstract",
                       "url",
-                      "citation count"]
+                      "tags"]
 
-SEARCH_QUERY = "radiation"
+DEFAULT_SEARCH_QUERY = "radiation"
+
+ARXIV_KEYS = ["title", 
+              "arxiv_journal_ref", 
+              "authors", 
+              "arxiv_doi", 
+              "published", 
+              "summary", 
+              "link", 
+              "tags"]
