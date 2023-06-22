@@ -30,7 +30,9 @@ ARXIV_KEYS = ["title",
               "tags"
               ]
 
-MASTER_CSV_COLUMNS = ["title",
+MASTER_CSV_COLUMNS = ["query",
+                      "query_time",
+                      "title",
                       "journal",
                       "authors",
                       "doi",
