@@ -129,3 +129,4 @@ dmypy.json
 
 # Manual ignore
 Code/my_api_key.py
+.env
