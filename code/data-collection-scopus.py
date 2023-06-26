@@ -48,7 +48,7 @@ def parse_data(data) -> List[Dict[str, str]]:
         school = affiliation_data.get('affilname', 'N/A')
 
         # Add extracted data to the parsed list
-        if pii != "N/A":
+        if pii != "N/A" or abstract != "N/A":
             parsed.append({
                 'title': title,
                 'journal': journal,
@@ -83,9 +83,14 @@ def search() -> None:
 
     seen_dois = set()
 
-    with open(f'./data/{helper.SEARCH_QUERY}.csv', 'a', newline='', encoding='utf-8') as file:
+    data_path = f'./data/{helper.SEARCH_QUERY}.csv'
+
+    with open(data_path, 'a', newline='', encoding='utf-8') as file:
         writer = csv.DictWriter(file, fieldnames=helper.MASTER_CSV_COLUMNS)
-        writer.writeheader()
+        
+        # Check if the file is empty or doesn't exist, then write headers
+        if os.stat(data_path).st_size == 0:
+            writer.writeheader()
         
         while parameters['start'] != 75:
             response = requests.get(SCOPUS_URL, headers=HEADERS, params=parameters)
