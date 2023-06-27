@@ -5,7 +5,6 @@ DEFAULT_BASE_URL = "https://export.arxiv.org/api/"
 DEFAULT_METHOD = "query"
 DEFAULT_URL = DEFAULT_BASE_URL + DEFAULT_METHOD
 DEFAULT_SEARCH_QUERY = "radiation"
-SEARCH_QUERY = "radiation"
 DEFAULT_DATE_QUERY = "2010-01-01" # year-mo-day
 MAX_STEP_SIZE = 2000
 MAX_VIEW_SIZE = 30000
@@ -30,7 +29,8 @@ ARXIV_KEYS = ["title",
               "tags"
               ]
 
-MASTER_CSV_COLUMNS = ["query",
+MASTER_CSV_COLUMNS = ["source",
+                      "query",
                       "query_time",
                       "title",
                       "journal",
