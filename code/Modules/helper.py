@@ -101,7 +101,6 @@ def reset_papers_db() -> None:
     # Return
     return None
 
-
 def db_summary() -> pd.core.frame.DataFrame:
     """ 
     Prints a report table of the count of paper entries by query and by source. Returns the object itself as well, for function use.
@@ -128,3 +127,39 @@ def db_summary() -> pd.core.frame.DataFrame:
     report = pd.DataFrame(data=data_rows, columns=data_header)
     print(report)
     return report
+
+def remove_dupes(verbose: int=1) -> None:
+    """ 
+    Manually remove duplicates in complete_db.csv of duplicate arvix entries.
+
+    verbose -> int
+        0: suppresses reporting on changes to the database
+        1: reports on changes to database
+    
+    Returns -> None
+        complete_db.csv is clean of duplicates via the "url" column
+    
+    Example
+        remove_dupes()
+    """
+    database = pd.read_csv("../../data/complete_db.csv")
+    
+    if verbose == 1:
+        pre_len = len(database)
+    
+    database = database[~database.duplicated("url")]
+    
+    if verbose == 1:
+        post_len = len(database)
+        print(f"Removed {post_len - pre_len} duplicates ({pre_len} -> {post_len})!")
+    
+    print("Completed.")
+    return database
+#----------------------------------------------------
+# Module Checking
+#----------------------------------------------------
+def main():
+    pass
+
+if __name__ == "__main__":
+    main()
