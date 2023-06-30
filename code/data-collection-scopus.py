@@ -62,17 +62,12 @@ def parse_data(data) -> List[Dict[str, str]]:
                     'school': school
                 }
             })
-
-        time.sleep(random.uniform(1, 3))
     
     return parsed
 
 # Function to search Scopus API
 def search() -> None:
 
-    # Get search terms from user
-    # query = input("Enter search terms separated by commas: ").split(",")
-    
     # Define parameters for API request
     parameters = {
         'query': helper.SEARCH_QUERY,
@@ -104,6 +99,7 @@ def search() -> None:
                         seen_dois.add(entry['doi'])
                         
                 parameters['start'] += 25
+                time.sleep(random.uniform(1, 3))
             else:
                 print("Failed:", response.status_code)
                 break
