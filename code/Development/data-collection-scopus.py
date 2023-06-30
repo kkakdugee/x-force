@@ -8,6 +8,7 @@ import time # Wait time
 import random 
 
 # Helper modules
+sys.path.insert(0, "../Modules")
 import helper
 import scopus_scraper
 
@@ -66,7 +67,7 @@ def parse_data(data) -> List[Dict[str, str]]:
     return parsed
 
 # Function to search Scopus API
-def search() -> None:
+def gather_data() -> None:
 
     # Define parameters for API request
     parameters = {
@@ -78,7 +79,7 @@ def search() -> None:
 
     seen_dois = set()
 
-    data_path = f'./data/{helper.SEARCH_QUERY}.csv'
+    data_path = './data/scopus.csv'
 
     with open(data_path, 'a', newline='', encoding='utf-8') as file:
         writer = csv.DictWriter(file, fieldnames=helper.MASTER_CSV_COLUMNS)
@@ -103,11 +104,14 @@ def search() -> None:
             else:
                 print("Failed:", response.status_code)
                 break
-    print(f"Data saved into {helper.SEARCH_QUERY}.csv")
+
+        file.close()
+
+    print(f"Data saved into scopus.csv")
 
     
 
 if __name__ == "__main__":
-    search()
+    gather_data()
 
 
