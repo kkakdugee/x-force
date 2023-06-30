@@ -1,14 +1,16 @@
 from dotenv import load_dotenv # Loading environment variables (API KEY)
 from typing import List, Dict 
+from datetime import datetime
 
 import requests # HTTP requests
 import csv # Creating and Manipulating CSV files
 import os # For accessing the env file
 import time # Wait time
 import random 
+import sys
 
 # Helper modules
-sys.path.insert(0, "../Modules")
+sys.path.insert(0, "./code/Modules")
 import helper
 import scopus_scraper
 
@@ -51,6 +53,9 @@ def parse_data(data) -> List[Dict[str, str]]:
         # Add extracted data to the parsed list
         if pii != "N/A" or abstract != "N/A":
             parsed.append({
+                'source': 'scopus',
+                'query': helper.DEFAULT_SEARCH_QUERY,
+                'query_time': datetime.now(),
                 'title': title,
                 'journal': journal,
                 'doi': doi,
@@ -67,11 +72,11 @@ def parse_data(data) -> List[Dict[str, str]]:
     return parsed
 
 # Function to search Scopus API
-def gather_data() -> None:
+def search() -> None:
 
     # Define parameters for API request
     parameters = {
-        'query': helper.SEARCH_QUERY,
+        'query': helper.DEFAULT_SEARCH_QUERY,
         'view': 'STANDARD', # COMPLETE
         'count': 25,
         'start': 0
@@ -79,18 +84,15 @@ def gather_data() -> None:
 
     seen_dois = set()
 
-    data_path = './data/scopus.csv'
+    data_path = './data/complete_db.csv'
 
     with open(data_path, 'a', newline='', encoding='utf-8') as file:
         writer = csv.DictWriter(file, fieldnames=helper.MASTER_CSV_COLUMNS)
         
-        # Check if the file is empty or doesn't exist, then write headers
-        if os.stat(data_path).st_size == 0:
-            writer.writeheader()
-        
-        while parameters['start'] != 75:
+        while parameters['start'] != 1000:
             response = requests.get(SCOPUS_URL, headers=HEADERS, params=parameters)
             if response.status_code == 200:
+                query_time = datetime.now()
                 data = response.json()
                 entries = parse_data(data)
                 
@@ -105,13 +107,11 @@ def gather_data() -> None:
                 print("Failed:", response.status_code)
                 break
 
-        file.close()
-
-    print(f"Data saved into scopus.csv")
+    print("Data saved into complete_db.csv")
 
     
 
 if __name__ == "__main__":
-    gather_data()
+    search()
 
 
