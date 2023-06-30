@@ -1,5 +1,6 @@
-
-# %%
+#----------------------------------------------------
+# Imports Checking
+#----------------------------------------------------
 import pandas as pd
 import numpy as np
 import requests
@@ -7,12 +8,11 @@ import feedparser
 import time
 from datetime import datetime
 import sys
-
-# %%
-sys.path.insert(0, "../Modules")
 import helper
 
-# %%
+#----------------------------------------------------
+# Query Functions
+#----------------------------------------------------
 def fetch_request(query: str=helper.DEFAULT_SEARCH_QUERY, start: int=0, max_results: int=25) -> feedparser.util.FeedParserDict:
     """
     Performs a fetch request using the arXiv API, returning the most recently published results first.
@@ -58,7 +58,6 @@ def fetch_request(query: str=helper.DEFAULT_SEARCH_QUERY, start: int=0, max_resu
         else:
             raise ConnectionError(response.status_code)
 
-# %%
 def parse_request(feed: feedparser.util.FeedParserDict, query: str, verbose: int=1) -> pd.core.frame.DataFrame:
     """
     Converts the given JSON feed file into a legible dataframe (useful for .csv storage).
@@ -107,7 +106,6 @@ def parse_request(feed: feedparser.util.FeedParserDict, query: str, verbose: int
     print("Parsed!")
     return df
 
-# %%
 def helper_fetch_parse_request(query: str=helper.DEFAULT_SEARCH_QUERY, start: int=0, max_results: int=25, verbose: int=1) -> pd.core.frame.DataFrame:
     """
     Helper function for the main fetch_parse_request() function.
@@ -132,7 +130,6 @@ def helper_fetch_parse_request(query: str=helper.DEFAULT_SEARCH_QUERY, start: in
     df = parse_request(feed, query=query, verbose=verbose)
     return df
 
-# %%
 def helper_remove_dupes(df: pd.core.frame.DataFrame, verbose: int=1) -> pd.core.frame.DataFrame:
     """
     Removes the duplicate entries (checked via URL base) from a given dataframe containing recently fetched queries.
@@ -172,7 +169,6 @@ def helper_remove_dupes(df: pd.core.frame.DataFrame, verbose: int=1) -> pd.core.
     # Return
     return df
 
-# %%
 def fetch_parse_request(query: str=helper.DEFAULT_SEARCH_QUERY, start: int=0, max_results: int=25, verbose: int=1, remove_dupes: int=1) -> list:
     """
     Wrapper that combines both the fetching and parsing of a request. Handles requests larger than 2000. See individual functions for more details.
@@ -230,7 +226,6 @@ def fetch_parse_request(query: str=helper.DEFAULT_SEARCH_QUERY, start: int=0, ma
     # Return
     return results
 
-# %%
 def merge_request(list_of_dfs: list, verbose: int=1) -> None:
     """
     Merges the dfs of paper entries into to the completed_db.csv, regardless of whether paper entries are duplicates.
@@ -285,7 +280,6 @@ def merge_request(list_of_dfs: list, verbose: int=1) -> None:
     # return
     return None
 
-# %%
 def pull_request(query: str=helper.DEFAULT_SEARCH_QUERY, start: int=0, max_results: int=25, verbose: int=1, remove_dupes: int=1) -> None:
     """
     Adds indicated number of paper entries for the given query to the completed_db.csv.
@@ -319,7 +313,6 @@ def pull_request(query: str=helper.DEFAULT_SEARCH_QUERY, start: int=0, max_resul
     merge_request(list_of_dfs, verbose=verbose)
     return None
 
-# %%
 def pull_requests(queries: list, start: int=0, max_results: int=25, verbose: int=1, remove_dupes: int=1) -> None:
     """
     Adds indicated number of paper entries for the given queries to the completed_db.csv.
@@ -357,32 +350,11 @@ def pull_requests(queries: list, start: int=0, max_results: int=25, verbose: int
 
     return None
 
-# %%
-def remove_dupes(verbose: int=1) -> None:
-    """ 
-    Manually remove duplicates in complete_db.csv of duplicate arvix entries.
+#----------------------------------------------------
+# Module Checking
+#----------------------------------------------------
+def main():
+    pass
 
-    verbose -> int
-        0: suppresses reporting on changes to the database
-        1: reports on changes to database
-    
-    Returns -> None
-        complete_db.csv is clean of duplicates via the "url" column
-    
-    Example
-        remove_dupes()
-    """
-    database = pd.read_csv("../../data/complete_db.csv")
-    database = database[database["source"] == "arxiv"]
-    
-    if verbose == 1:
-        pre_len = len(database)
-    
-    database = database[~database.duplicated("url")]
-    
-    if verbose == 1:
-        post_len = len(database)
-        print(f"Removed {post_len - pre_len} duplicates ({pre_len} -> {post_len})!")
-    
-    print("Completed.")
-    return database
+if __name__ == "__main__":
+    main()
