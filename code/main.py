@@ -9,7 +9,7 @@ import feedparser
 import time
 from datetime import datetime
 import sys
-sys.path.append("Modules/")
+sys.path.append("./code/Modules/")
 import helper
 import arxiv
 import eda_graphing

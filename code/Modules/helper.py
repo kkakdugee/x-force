@@ -93,7 +93,7 @@ def reset_papers_db() -> None:
     # Saving data to csv
     df = pd.DataFrame(columns=MASTER_CSV_COLUMNS)
     try:
-        df.to_csv("../data/complete_db.csv", index=False)
+        df.to_csv("./data/complete_db.csv", index=False)
         print("Saved!")
     except:
         print("Failed to save...")
@@ -111,7 +111,7 @@ def db_summary() -> pd.core.frame.DataFrame:
     Example
         report = db_summary()
     """
-    df = pd.read_csv("../data/complete_db.csv")
+    df = pd.read_csv("./data/complete_db.csv")
     sources = set(df["source"].values.tolist())
     queries = list(set(df["query"].values.tolist()))
     l = [["source"], queries]
@@ -142,7 +142,7 @@ def remove_dupes(verbose: int=1) -> None:
     Example
         remove_dupes()
     """
-    database = pd.read_csv("../data/complete_db.csv")
+    database = pd.read_csv("./data/complete_db.csv")
     
     if verbose == 1:
         pre_len = len(database)
