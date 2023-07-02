@@ -19,7 +19,7 @@ class XForce_Grapher():
         self._data = None
         self._sources = None
         self._queries = None
-        self.load("./data/complete_db.csv")
+        self.load("../data/complete_db.csv")
         return None
 
 
