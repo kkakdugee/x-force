@@ -10,7 +10,7 @@ import random
 import sys
 
 # Helper modules
-sys.path.insert(0, "./code/Modules")
+sys.path.append("./code/Modules/")
 import helper
 import scopus_scraper
 
@@ -54,7 +54,7 @@ def parse_data(data) -> List[Dict[str, str]]:
         if pii != "N/A" or abstract != "N/A":
             parsed.append({
                 'source': 'scopus',
-                'query': helper.DEFAULT_SEARCH_QUERY,
+                'query': 'metamaterials', # helper.DEFAULT_SEARCH_QUERY
                 'query_time': datetime.now(),
                 'title': title,
                 'journal': journal,
@@ -76,7 +76,7 @@ def search() -> None:
 
     # Define parameters for API request
     parameters = {
-        'query': helper.DEFAULT_SEARCH_QUERY,
+        'query': 'metamaterials', # helper.DEFAULT_SEARCH_QUERY
         'view': 'STANDARD', # COMPLETE
         'count': 25,
         'start': 0
@@ -89,7 +89,7 @@ def search() -> None:
     with open(data_path, 'a', newline='', encoding='utf-8') as file:
         writer = csv.DictWriter(file, fieldnames=helper.MASTER_CSV_COLUMNS)
         
-        while parameters['start'] != 1000:
+        while parameters['start'] != 550:
             response = requests.get(SCOPUS_URL, headers=HEADERS, params=parameters)
             if response.status_code == 200:
                 query_time = datetime.now()
