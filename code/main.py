@@ -17,46 +17,75 @@ import eda_graphing
 #----------------------------------------------------
 # Main
 #----------------------------------------------------
+def menu_creator() -> set:
+    """ 
+    Helper function that auto generates the user menu. Changes to the user menu should be in this function.
+
+    Returns -> set
+        User-menu printed out, along with a set of options for user control.
+
+    Example
+        menu_creator()
+    """
+    # Variables
+    auto_options = [
+        "Update database by search term from arxiv",
+        "Visualizations by search term",
+        "Summary of database",
+        "Clean dupes from database"
+    ]
+    hard_options = [
+        "Exit program", "e'"
+        "Wipe database", "w"
+    ]
+    return_set = {}
+
+    # Generation
+    print("========")
+    print("Menu")
+    print("========")
+    for index, option in enumerate(auto_options):
+        print(f"{index}. {option}")
+        return_set.add(str(index))
+    for option in hard_options:
+        print(f"{option[1]}. {option[0]}")
+        return_set.add(str(option[1]))
+    return return_set
+
+def option_pull_request():
+    print("Please input the search query or queries (separated by commas).")
+    print("Eg. 'radiation, plasmonics, metamaterials'", end="\n")
+    user_queries = input("Search queries?")
+    
+    print("--")
+    print("Please input the additional search parameters (separated by commas).")
+    print("The format is [starting index, number of papers, report data changes (y,n), remove duplicates (y,n)]")
+    print("Eg. '5, 10, n, y'")
+    print("This will save the papers starting at the 5th paper and ending on the 14th paper (for total of 10 papers saved), won't show the data changes to the database, and will exclude saving duplicates.", end="\n")
+    user_params = input("Query parameters?")
+
+    queries = [i.strip() for i in user_queries.split(",")]
+    start, max_results, verbose, remove_dupes = [i.strip() for i in user_params.split(",")]
+    arxiv.pull_requests(queries=queries, start=start, max_results=max_results, verbose=verbose, remove_dupes=remove_dupes)
+
+    print("Completed!")
+
 def main() -> None:
 
     print("Welcome!")
     current_session = eda_graphing.XForce_Grapher()
-
+    options_pool = ""
     while True:
         while True:
-            print("========")
-            print("Menu")
-            print("========")
-            print("1. Update database by search term from arxiv")
-            print("2. Visualizations by search term")
-            print("3. Summary of database")
-            print("4. Clean dupes from database")
-            print("e. Exit program")
-            print("w. Wipe database")
-            user_input = input("Pick your option (1-4, e, w).")
-            if user_input not in {"w","1","2","3","4","e"}:
-                print("Invalid answer. Please input an integer from this list (1-4) or letter from this list (e, w).", end="\n")
+            options_pool = menu_creator()
+            user_input = input(f"Pick your option {options_pool}.")
+            if user_input not in options_pool:
+                print(f"Invalid answer. Please an input within {options_pool}", end="\n")
             else:
                 break
 
         if user_input == "1":
-            print("--")
-            print("Please input the search query or queries (separated by commas).")
-            print("Eg. 'radiation, plasmonics, metamaterials'")
-            user_queries = input("Search queries?")
-            
-            print("--")
-            print("Please input the additional search parameters (separated by commas).")
-            print("The format is [starting index, number of papers, report data changes (y,n), remove duplicates (y,n)]")
-            print("Eg. '5, 10, n, y'")
-            print("This will save the papers starting at the 5th paper and ending on the 14th paper (for total of 10 papers saved), won't show the data changes to the database, and will exclude saving duplicates.")
-            user_params = input("Query parameters?")
-
-            queries = [i.strip() for i in user_queries.split(",")]
-            start, max_results, verbose, remove_dupes = [i.strip() for i in user_params.split(",")]
-            arxiv.pull_requests(queries=queries, start=start, max_results=max_results, verbose=verbose, remove_dupes=remove_dupes)
-
-            print("Completed!")
+            option_pull_request()
         elif user_input == "2":
             print("--")
             print("Please input the search query or queries (separated by commas).")
