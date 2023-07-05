@@ -73,7 +73,7 @@ def option_arxiv_update(dummy_var) -> None:
     print("Completed!")
     return None
 
-def option_visualize(current_session: arxiv.XForce_Grapher) -> None:
+def option_visualize(current_session: eda_graphing.XForce_Grapher) -> None:
     """ 
     Helper function for menu-navigation; parses user inputs and then feeds into the .graph_freq() method on current_session class.
 
