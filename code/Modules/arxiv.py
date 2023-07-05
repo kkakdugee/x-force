@@ -156,7 +156,7 @@ def helper_remove_dupes(df: pd.core.frame.DataFrame, verbose: int=1) -> pd.core.
         pre_len = len(df)
 
     # Removing dupes
-    database = pd.read_csv("../../data/complete_db.csv")
+    database = pd.read_csv("../data/complete_db.csv")
     database = database[database["source"] == "arxiv"]
     checks = database["url"].values.tolist()
     for check in checks:
@@ -250,30 +250,30 @@ def merge_request(list_of_dfs: list, verbose: int=1) -> None:
         return None
 
     if verbose == 1:
-            database = pd.read_csv("../../data/complete_db.csv")
+            database = pd.read_csv("../data/complete_db.csv")
             super_pre_len = len(database)
 
     for index, df in enumerate(list_of_dfs):
         print(f"Merging {index+1}/{len(list_of_dfs)}...")
         # Save df
         if verbose == 1:
-            database = pd.read_csv("../../data/complete_db.csv")
+            database = pd.read_csv("../data/complete_db.csv")
             pre_len = len(database)
             print(f"Attempting to add {len(df)} entries...")
 
         try:
-            df.to_csv("../../data/complete_db.csv", mode='a', index=False, header=False)
+            df.to_csv("../data/complete_db.csv", mode='a', index=False, header=False)
             print("Saved!")
         except:
             print("Failed to save.")
 
         if verbose == 1:
-            database = pd.read_csv("../../data/complete_db.csv")
+            database = pd.read_csv("../data/complete_db.csv")
             post_len = len(database)
             print(f"Added {post_len - pre_len} entries ({pre_len} -> {post_len})!")
     
     if verbose == 1:
-        database = pd.read_csv("../../data/complete_db.csv")
+        database = pd.read_csv("../data/complete_db.csv")
         super_post_len = len(database)
         print(f"In summary, added {super_post_len - super_pre_len} entries ({super_pre_len} -> {super_post_len})!")
 

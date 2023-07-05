@@ -8,7 +8,7 @@ import feedparser
 import time
 from datetime import datetime
 import sys
-sys.path.append("Modules/")
+sys.path.append(".Modules/")
 import helper
 import arxiv
 import eda_graphing
@@ -39,7 +39,7 @@ def option_wipe(dummy_var) -> None:
         option_wipe(dummy_var)
     """
     helper.reset_papers_db()
-    print("Completed!")
+    print("Completed!", end="\n\n")
     return None
 
 def option_arxiv_update(dummy_var) -> None:
@@ -56,23 +56,24 @@ def option_arxiv_update(dummy_var) -> None:
         option_arxiv_update(dummy_var)
     """
     print("Please input the search query or queries (separated by commas).")
-    print("Eg. 'radiation, plasmonics, metamaterials'", end="\n")
+    print("Eg. 'radiation, plasmonics, metamaterials'")
     user_queries = input("Search queries?")
     
     print("--")
     print("Please input the additional search parameters (separated by commas).")
     print("The format is [starting index, number of papers, report data changes (y,n), remove duplicates (y,n)]")
     print("Eg. '5, 10, n, y'")
-    print("This will save the papers starting at the 5th paper and ending on the 14th paper (for total of 10 papers saved), won't show the data changes to the database, and will exclude saving duplicates.", end="\n")
+    print("This will save the papers starting at the 5th paper and ending on the 14th paper (for total of 10 papers saved), won't show the data changes to the database, and will exclude saving duplicates.", end="\n\n")
     user_params = input("Query parameters?")
 
     queries = [i.strip() for i in user_queries.split(",")]
-    start, max_results, verbose, remove_dupes = [i.strip() for i in user_params.split(",")]
+    start, max_results, verbose, remove_dupes = [int(helper.map_yes_no(i.strip())) for i in user_params.split(",")]
     arxiv.pull_requests(queries=queries, start=start, max_results=max_results, verbose=verbose, remove_dupes=remove_dupes)
 
-    print("Completed!")
+    print("Completed!", end="\n\n")
     return None
 
+def option_visualize(current_session: eda_graphing.XForce_Grapher) -> None:
 def option_visualize(current_session: eda_graphing.XForce_Grapher) -> None:
     """ 
     Helper function for menu-navigation; parses user inputs and then feeds into the .graph_freq() method on current_session class.
@@ -88,20 +89,20 @@ def option_visualize(current_session: eda_graphing.XForce_Grapher) -> None:
     """
     print("Please input the search query or queries (separated by commas).")
     print("Eg. 'radiation, plasmonics, metamaterials'")
-    user_queries = input("Search queries?", end="\n")
+    user_queries = input("Search queries?", end="\n\n")
 
     print("Please input source restriction, if any. Currently, only one source can be queried at a time. If there are no restrictions, hit ENTER key again.")
     print("Eg. 'arxiv'")
     print("Eg. ''")
     print("The first example will only analyze papers pulled from arxiv. The second example (which is the empty string) means you have no restrictions and the analysis will be performed on the entire database.")
-    user_params = input("Query parameters?", end="\n")
+    user_params = input("Query parameters?", end="\n\n")
     if user_params == "":
         user_params = "ALL"
 
     queries = [i.strip() for i in user_queries.split(",")]
     for query in queries:
         current_session.graph_freq(query, user_params)
-    print("Completed!")
+    print("Completed!", end="\n\n")
     return None
 
 def option_db_summary(dummy_var) -> None:
@@ -118,7 +119,7 @@ def option_db_summary(dummy_var) -> None:
         option_db_summary(dummy_var)
     """
     helper.db_summary()
-    print("Completed!")
+    print("Completed!", end="\n\n")
     return None
 
 def option_clean_dupes(dummy_var) -> None:
@@ -135,7 +136,7 @@ def option_clean_dupes(dummy_var) -> None:
         option_clean_dupes(dummy_var)
     """
     helper.remove_dupes()
-    print("Completed!")
+    print("Completed!", end="\n\n")
     return None
 
 def menu_creator() -> dict:
@@ -188,21 +189,21 @@ def menu_print(menu: dict) -> None:
 # Main
 #----------------------------------------------------
 def main() -> None:
-
     print("Welcome!")
     current_session = eda_graphing.XForce_Grapher()
     menu = menu_creator()
     while True:
         while True:
             menu_print(menu)
-            user_input = input(f"Pick your option {menu.keys()}.")
+            print_options = [key for key in menu.keys()]
+            user_input = input(f"Pick your option: {print_options}.")
             if user_input not in menu.keys():
-                print(f"Invalid answer. Please an input within {menu.keys()}", end="\n")
+                print(f"Invalid answer. Please an input within {print_options}", end="\n\n")
             else:
                 break
 
         try:
-            menu[user_input](current_session)
+            menu[user_input][1](current_session)
         except StopIteration:
             break
             
