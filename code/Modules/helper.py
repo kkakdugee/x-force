@@ -154,6 +154,27 @@ def remove_dupes(verbose: int=1) -> None:
         print(f"Removed {post_len - pre_len} duplicates ({pre_len} -> {post_len})!")
 
     return database
+
+def map_yes_no(input: str) -> int:
+    """ 
+    Maps y/n -> 1/0. All other values are returned as is.
+
+    input -> str
+        Given "y" or "n".
+    
+    Returns -> int
+        1 if "y", 0 elif "n", the original value otherwise.
+    
+    Example
+        map_yes_no("y")
+    """
+    if input == "y":
+        return 1
+    elif input == "n":
+        return 0
+    else:
+        return input
+
 #----------------------------------------------------
 # Module Checking
 #----------------------------------------------------
