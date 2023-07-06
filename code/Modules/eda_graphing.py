@@ -61,57 +61,79 @@ class XForce_Grapher():
         sources = list(set(df["source"].values.tolist()))
         sources.append("ALL")
         queries = list(set(df["query"].values.tolist()))
+        queries.append("ALL")
 
         self._data = df
         self._sources = sources
         self._queries = queries
         return None
 
-    def graph_pub_freq(self, query: str, source: str="ALL") -> None:
+    def graph_pub_freq(self, 
+                       queries: list=["ALL"], 
+                       sources: list=["ALL"]) -> None:
         """
+        # TODO Fix scopus date. Do not you run "ALL" for sources.
+
         Graphs the publishing frequency of papers in the database.
 
-        query -> str
-            The given search query to visualize
+        queries -> list
+            The given list of search queries (can be a 1-item list) that match database queries
+            ALL: Considers all queries
 
-        source -> int
-            The database source to restrict visualizations on
-            arxiv: Graph only results from arxiv
-            scopus: Graph only results from scopus
-            ALL: Graphs all
+        sources -> list
+            The given list of search sources (can be a 1-item list) that match database sources
+            ALL: Considers all sources
 
         Returns -> None
             Shows matplotlib graph of the published frequency
         
         Example
             grapher = XForce_Grapher()
-            grapher.graph_pub_freq("radiation", "arxiv")
+            grapher.graph_pub_freq(["ALL"], ["ALL"])
         """
-        if source not in self._sources:
-            raise ValueError(f"{source} invalid, must be {self._sources}")
+        # Input Error Handling
+        for source in sources:
+            if source not in self._sources:
+                raise ValueError(f"{source} invalid, must be {self._sources}")
         
-        if query not in self._queries:
-            raise ValueError(f"{query} invalid, must be {self._queries}")
+        for query in queries:
+            if query not in self._queries:
+                raise ValueError(f"{query} invalid, must be {self._queries}")
 
+        # Load Data
         df = self._data.copy()
-        if source != "ALL":
-            df = df[df["source"] == source]
-        df = df[df["query"] == query]
+        
+        # Filter Data
+        title_sources, title_queries = ["ALL"], ["ALL"]
+        if "ALL" not in sources:
+            expression = helper.generate_boolean_conditions("source", sources)
+            df = df[eval(expression)]
+            title_sources = sources
+        if "ALL" not in queries:
+            expression = helper.generate_boolean_conditions("query", queries)
+            df = df[eval(expression)]
+            title_queries = queries
+        
+        # Data Setup
         dates_extract = df["published"].apply(lambda x: x.split('T')[0])
         dates = [datetime(int(i.split("-")[0]), int(i.split("-")[1]), int(i.split("-")[2])) for i in dates_extract]
         
-        plt.title(f"Source: {source}, Query: {query}")
+        # Graph
+        plt.title(f"Source: {title_sources}, Query: {title_queries}")
         plt.suptitle(f"Publish Frequency within {len(dates)} Most Recent Papers")
         plt.xlabel("Publish Dates")
         plt.ylabel("Frequency")
         plt.grid("True")
         plt.xticks(rotation=45)
         plt.hist(dates, 25, alpha=.75)
+        plt.savefig(f"../images/pub_freq/pub_freq_{'_'.join(title_sources)}_{'_'.join(title_queries)}.png")
         plt.show()
+
+        # Return
         return None
 
     def load_db_summary(self) -> None:
-        """ 
+        """
         Generates the report table of the count of paper entries by query and by source and stores it in class attribute.
 
         Returns -> None
@@ -137,7 +159,7 @@ class XForce_Grapher():
                 filtered_by_query_df = filtered_by_source_df[filtered_by_source_df["query"] == query]
                 data_row.append(len(filtered_by_query_df))
             data_rows.append(data_row)
-        report = pd.DataFrame(data=data_rows, columns=data_header)
+        report = pd.DataFrame(data=data_rows, columns=data_header).iloc[:, :-1]
         self._summary = report
         return None
     
@@ -167,8 +189,8 @@ class XForce_Grapher():
             grapher.graph_db_summary()
         """
         df = self._summary.copy()
-        extract_counts = df.T.values.tolist()[1:]
-        extract_queries = df.T.index.tolist()[1:]
+        extract_counts = df.T.values.tolist()[1:-1] # -1 to remove the "ALL" from the category
+        extract_queries = df.T.index.tolist()[1:-1]
         sources = df["source"]
 
         query_count_data = {}
@@ -188,6 +210,7 @@ class XForce_Grapher():
         plt.ylabel("Counts")
         plt.grid("True")
         plt.legend(loc='upper left', bbox_to_anchor=(1,1))
+        plt.savefig(f"../images/db_summ/db_summ.png")
         plt.show()
 
         return None
@@ -228,39 +251,48 @@ class XForce_Grapher():
         # Return
         return None
     
-    def graph_text_count(self, 
+    def graph_text_freq(self, 
                          queries: list=["ALL"], 
-                         source: str="ALL", 
+                         sources: list=["ALL"], 
                          text_mode: str="word", 
                          type_mode: str="abstract") -> None:
         """
-        Graphs the text_mode (character or word) count of type_mode (title or abstract) of paper entries. 
+        Graphs the text frequency (eg. character/word count of title/abstract) of indicated papers
 
         queries -> list
-            Given list of queries to graph on
-            If list contains the string "ALL", it will graph every query
+            The given list of search queries (can be a 1-item list) that match database queries
+            ALL: Considers all queries
 
-        source -> str
-            Given source to filter on
-            If given string is "ALL", then it will graph from all sources
-
-        type_mode -> str
-            Given type mode to filter on
-            "title": Graphs on title
-            "abstract": Graphs on abstract
+        sources -> list
+            The given list of search sources (can be a 1-item list) that match database sources
+            ALL: Considers all sources
 
         text_mode -> str
             Given type mode to filter on
             "char": Graphs via character count
             "word": Graphs via word count
 
+        type_mode -> str
+            Given type mode to filter on
+            "title": Graphs on title
+            "abstract": Graphs on abstract
+
         Returns -> None
             Shows matplotlib graph of the text counts
         
         Example
             grapher = XForce_Grapher()
-            grapher.graph_text_count(queries=["radiation", "plasmonics"], source="arxiv", text_mode="word", type_mode="abstract")
+            grapher.graph_text_freq(queries=["radiation", "plasmonics"], source=["arxiv"], text_mode="word", type_mode="abstract")
         """
+        # Input Error Handling
+        for source in sources:
+            if source not in self._sources:
+                raise ValueError(f"{source} invalid, must be {self._sources}")
+        
+        for query in queries:
+            if query not in self._queries:
+                raise ValueError(f"{query} invalid, must be {self._queries}")
+
         text_mode_options = {"char", "word"}
         if text_mode not in text_mode_options:
             raise ValueError(f"{text_mode} invalid; must be {text_mode_options}")
@@ -269,29 +301,30 @@ class XForce_Grapher():
         if type_mode not in type_mode_options:
             raise ValueError(f"{type_mode} invalid; must be {type_mode_options}")
 
-        if source not in self._sources:
-            raise ValueError(f"{source} invalid, must be {self._sources}")
-        
-        for query in queries:
-            if query not in self._queries:
-                raise ValueError(f"{query} in queries list invalid, must be {self._queries}")
-
+        # Load Data
         df = self._nlp_summary.copy()
-        if source != "ALL":
-            df = df[df["source"] == source]
+        
+        # Filter Data
+        title_sources, title_queries = ["ALL"], ["ALL"]
+        if "ALL" not in sources:
+            expression = helper.generate_boolean_conditions("source", sources)
+            df = df[eval(expression)]
+            title_sources = sources
+        if "ALL" not in queries:
+            expression = helper.generate_boolean_conditions("query", queries)
+            df = df[eval(expression)]
+            title_queries = queries
+        else:
+            queries = self._queries[:-1]
 
-        title_label = queries
-        if "ALL" in queries:
-            queries = self._queries.copy()
-            title_label = "ALL"
-
+        # Data Setup
         expression = f"{type_mode}_{text_mode}_count"
-
         graph_data = []
         for query in queries:
             graph_data.append(df[df["query"] == query][expression])
 
-        plt.title(f"Source: {source}, Query: {title_label}")
+        # Graphing
+        plt.title(f"Source: {title_sources}, Query: {title_queries}")
         plt.suptitle(f"Summary Statistics of {type_mode.title()} {text_mode.title()} Count by Specified Papers")
         plt.xlabel("Query")
         plt.ylabel("Count")
@@ -299,13 +332,14 @@ class XForce_Grapher():
         plt.xticks(rotation=45)
         plt.boxplot(graph_data, positions=np.array(range(len(graph_data)))*2.0, sym='', widths=1.5)
         plt.xticks(range(0, len(queries)*2, 2), queries, rotation=45)
+        plt.savefig(f"../images/text_freq/text_freq_{'_'.join(title_sources)}_{'_'.join(title_queries)}.png")
         plt.show()
 
         return None
     
     def graph_keyword_freq(self, 
                            queries: list=["ALL"], 
-                           source: str="ALL", 
+                           sources: list=["ALL"], 
                            type_mode: str="abstract", 
                            k: int=15, 
                            n_gram: int=1, 
@@ -314,12 +348,12 @@ class XForce_Grapher():
         Graphs the keyword frequency of the specified papers. 
 
         queries -> list
-            Given list of queries to graph on
-            If list contains the string "ALL", it will graph every query
+            The given list of search queries (can be a 1-item list) that match database queries
+            ALL: Considers all queries
 
-        source -> str
-            Given source to filter on
-            If given string is "ALL", then it will graph from all sources
+        sources -> list
+            The given list of search sources (can be a 1-item list) that match database sources
+            ALL: Considers all sources
 
         type_mode -> str
             Given type mode to filter on
@@ -342,30 +376,34 @@ class XForce_Grapher():
             grapher = XForce_Grapher()
             grapher.graph_text_count(queries=["radiation", "plasmonics"], source="arxiv", type_mode="abstract", k=15, n_grams=1)
         """
-        df = self._nlp_summary.copy()
+        # Input Error Handling
+        for source in sources:
+            if source not in self._sources:
+                raise ValueError(f"{source} invalid, must be {self._sources}")
+        
+        for query in queries:
+            if query not in self._queries:
+                raise ValueError(f"{query} invalid, must be {self._queries}")
 
         type_mode_options = {"title", "abstract"}
         if type_mode not in type_mode_options:
             raise ValueError(f"{type_mode} invalid; must be {type_mode_options}")
 
-        if source not in self._sources:
-            raise ValueError(f"{source} invalid, must be {self._sources}")
+        # Load Data
+        df = self._nlp_summary.copy()
         
-        for item in queries:
-            if item not in self._queries:
-                raise ValueError(f"{item} in your queries list invalid, must be {self._queries}")
-
-        if source != "ALL":
-            df = df[df["source"] == source]
-
-        if "ALL" in queries:
-            queries = self._queries.copy()
-            title_label = "ALL"
-        else:
-            condition_prefix = "df['query'] == "
-            expression = " | ".join([f"({condition_prefix}'{query}')" for query in queries])
+        # Filter Data
+        title_sources, title_queries = ["ALL"], ["ALL"]
+        if "ALL" not in sources:
+            expression = helper.generate_boolean_conditions("source", sources)
             df = df[eval(expression)]
-            title_label = queries
+            title_sources = sources
+        if "ALL" not in queries:
+            expression = helper.generate_boolean_conditions("query", queries)
+            df = df[eval(expression)]
+            title_queries = queries
+        else:
+            queries = self._queries[:-1]
 
         X = df.loc[:, type_mode]
         cvec = CountVectorizer(stop_words=stop_words, ngram_range=(n_gram, n_gram))
@@ -374,8 +412,8 @@ class XForce_Grapher():
 
         # graphing
         graph_data = X_cvec_df.sum().sort_values(ascending=False).head(k)
-        plt.title(f"Top {k} Most Common {n_gram}-Grams in Papers from Given Queries")
-        plt.suptitle(f"Source: {source}, Query: {title_label}")
+        plt.title(f"Source: {title_sources}, Query: {title_queries}")
+        plt.suptitle(f"Top {k} Most Common {n_gram}-Grams in Papers from Given Queries")
         plt.xlabel("Count")
         plt.xticks(rotation=90)
         plt.ylabel("Tokens")
@@ -384,7 +422,7 @@ class XForce_Grapher():
 
         # saving
         plt.tight_layout()
-        # plt.savefig(f"../images/most_common_{n_gram}_grams_{subreddit}.png")
+        plt.savefig(f"../images/keyword_freq/keyword_freq_{'_'.join(title_sources)}_{'_'.join(title_queries)}.png")
         plt.show()
 
         return None

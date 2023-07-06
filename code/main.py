@@ -56,22 +56,32 @@ def option_arxiv_update(dummy_var) -> None:
     Example
         option_arxiv_update(dummy_var)
     """
+    # Parsing
     print("Please input the search query or queries (separated by commas).")
     print("Eg. 'radiation, plasmonics, metamaterials'")
-    user_queries = input("Search queries? ")
-    
-    print("--")
-    print("Please input the additional search parameters (separated by commas).")
-    print("The format is [starting index, number of papers, report data changes (y,n), remove duplicates (y,n)]")
-    print("Eg. '5, 10, n, y'")
-    print("This will save the papers starting at the 5th paper and ending on the 14th paper (for total of 10 papers saved), won't show the data changes to the database, and will exclude saving duplicates.")
-    user_params = input("Query parameters? ")
-
+    user_queries = input("Search queries?")
+    if user_queries == "":
+        raise ValueError(f"{user_queries} empty string is invalid. Please input a real query.")
     queries = [i.strip() for i in user_queries.split(",")]
-    start, max_results, verbose, remove_dupes = [int(helper.map_yes_no(i.strip())) for i in user_params.split(",")]
-    arxiv.pull_requests(queries=queries, start=start, max_results=max_results, verbose=verbose, remove_dupes=remove_dupes)
+    print("\n", end="")
+    
+    # Parsing
+    print("Please input the additional search parameters (separated by commas). Hit ENTER for default values.")
+    print("Format. starting index, number of papers, report data changes (y,n), remove duplicates (y,n)")
+    print("Default. '0, 25, y, y'")
+    print("This will save the papers starting at the 0th paper and ending on the 24th paper (total 25 papers saved), will show changes to the database, and will exclude saving duplicates.")
+    user_params = input("Query parameters?")
+    if user_params == "":
+        print("Default options indicated!")
+        start, max_results, verbose, remove_dupes = 0, 25, 1, 1
+    else:
+        start, max_results, verbose, remove_dupes = [int(helper.map_yes_no(i.strip())) for i in user_params.split(",")]
+    print("\n", end="")
 
-    print("Completed!", end="\n\n")
+    # Function
+    arxiv.pull_requests(queries=queries, start=start, max_results=max_results, verbose=verbose, remove_dupes=remove_dupes)
+    print("Completed!")
+    print("\n", end="")
     return None
 
 def option_graph_pub_freq(current_session: eda_graphing.XForce_Grapher) -> None:
@@ -87,21 +97,36 @@ def option_graph_pub_freq(current_session: eda_graphing.XForce_Grapher) -> None:
     Example
         option_graph_pub_freq(current_session)
     """
-    print("Please input your search query.")
-    print("Eg. 'radiation'")
-    query = input("Search query?")
+    # Parsing
+    print("Please input your search query or queries (separated by commas). Hit ENTER for default.")
+    print("Default. 'ALL'")
+    print("Eg. 'radiation, plasmonics, metamaterials'")
+    user_queries = input("Search queries?")
+    if user_queries == "":
+        print("Default option indicated.")
+        queries = ["ALL"]
+    else:
+        queries = [i.strip() for i in user_queries.split(",")]
+    print("\n", end="")
 
-    print("Please input source restriction, if any. Currently, only one source can be queried at a time. If there are no restrictions, hit ENTER key again.")
-    print("Eg. 'arxiv'")
-    print("Eg. ''")
-    print("The first example will only analyze papers pulled from arxiv. The second example (which is the empty string) means you have no restrictions and the analysis will be performed on the entire database.")
-    source = input("Query parameters?")
-    if source == "":
-        source = "ALL"
+    # Parsing
+    print("Please input source restriction or restrictions (separated by commas). Hit ENTER for default.")
+    print("Default. 'ALL'")
+    print("Eg. 'arxiv, scopus'")
+    user_params = input("Query parameters?")
+    if user_params == "":
+        print("Default option indicated.")
+        sources = ["ALL"]
+    else:
+        sources = [i.strip() for i in user_params.split(",")]
+    print("\n", end="")
 
-    # queries = [i.strip() for i in user_queries.split(",")]
-    current_session.graph_pub_freq(query=query, source=source)
-    print("Completed!", end="\n\n")
+    # Function Call
+    current_session.graph_pub_freq(queries=queries, sources=sources)
+
+    # Return
+    print("Completed!")
+    print("\n", end="")
     return None
 
 def option_report_db_summary(current_session: eda_graphing.XForce_Grapher) -> None:
@@ -118,12 +143,16 @@ def option_report_db_summary(current_session: eda_graphing.XForce_Grapher) -> No
     Example
         option_graph_pub_freq(current_session)
     """
+    # Function Call
     current_session.report_db_summary()
     current_session.graph_db_summary()
-    print("Completed!", end="\n\n")
+    
+    # Return
+    print("Completed!")
+    print("\n", end="")
     return None
 
-def option_graph_text_count(current_session: eda_graphing.XForce_Grapher) -> None:
+def option_graph_text_freq(current_session: eda_graphing.XForce_Grapher) -> None:
     """ 
     Helper function for menu-navigation; parses user inputs and then feeds into the .graph_text_count() method on current_session class.
 
@@ -131,31 +160,54 @@ def option_graph_text_count(current_session: eda_graphing.XForce_Grapher) -> Non
         The given arxiv.XForce_Grapher object for which to graph the frequencies
     
     Returns -> None
-        Runs current_session.graph_text_count() with given inputs
+        Runs current_session.graph_text_freq() with given inputs
 
     Example
-        option_graph_pub_freq(current_session)
+        option_graph_text_freq(current_session)
     """
-    print("Please input the search query or queries (separated by commas) or 'ALL' if you want to graph all.")
+    # Parsing
+    print("Please input your search query or queries (separated by commas). Hit ENTER for default.")
+    print("Default. 'ALL'")
     print("Eg. 'radiation, plasmonics, metamaterials'")
-    print("Eg. 'ALL'")
     user_queries = input("Search queries?")
-    queries = [i.strip() for i in user_queries.split(",")]
-
-    print("Please input paramater restrictions (separated by commas). Otherwise, if you want the default values, hit ENTER key again.")
-    print("Format: 'source, text_mode, type_mode'")
-    print("Eg. 'arxiv', 'word', 'title'")
-    print("Eg. ''")
-    print("The first example will analyze the word count of titles of papers from arxiv. The second example (which is the empty string) means default values.")
-    user_params = input("Query parameters?")
-
-    if user_params == "":
-        current_session.graph_text_count(queries=queries)
+    if user_queries == "":
+        print("Default option indicated.")
+        queries = ["ALL"]
     else:
-        source, text_mode, type_mode = [i.strip() for i in user_queries.split(",")]
-        current_session.graph_text_count(queries=queries, source=source, text_mode=text_mode, type_mode=type_mode)
-    
-    print("Completed!", end="\n\n")
+        queries = [i.strip() for i in user_queries.split(",")]
+    print("\n", end="")
+
+    print("Please input source restriction or restrictions (separated by commas). Hit ENTER for default.")
+    print("Default. 'ALL'")
+    print("Eg. 'arxiv, scopus'")
+    user_params = input("Query parameters?")
+    if user_params == "":
+        print("Default option indicated.")
+        sources = ["ALL"]
+    else:
+        sources = [i.strip() for i in user_params.split(",")]
+    print("\n", end="")
+
+    print("Please additional search paramaters (separated by commas). Hit ENTER for default.")
+    print("Format: 'text_mode, type_mode'")
+    print("Default. 'word, abstract'")
+    print("text_mode can be (char/word), type_mode can be (title/abstract)")
+    user_add_params = input("Query parameters?")
+    if user_add_params == "":
+        print("Default option indicated.")
+        text_mode, type_mode = "word", "abstract"
+    else:
+        text_mode, type_mode = [i.strip() for i in user_add_params.split(",")]
+    print("\n", end="")
+
+    # Function Call
+    current_session.graph_text_freq(queries=queries, sources=sources, text_mode=text_mode, type_mode=type_mode)
+    print("NOTE: If the graph is empty, that means that the queried term does not exist within the given source!")
+    print("Eg. If you searched for 'radiation' within the 'scopus' dataset, if no papers with that term exist in the local scopus database, then an empty graph will appear.")
+
+    # Return
+    print("Completed!")
+    print("\n", end="")
     return None
 
 def option_graph_keyword_freq(current_session: eda_graphing.XForce_Grapher) -> None:
@@ -171,26 +223,47 @@ def option_graph_keyword_freq(current_session: eda_graphing.XForce_Grapher) -> N
     Example
         option_graph_keyword_freq(current_session)
     """
-    print("Please input the search query or queries (separated by commas) or 'ALL' if you want to graph all.")
+    # Parsing
+    print("Please input your search query or queries (separated by commas). Hit ENTER for default.")
+    print("Default. 'ALL'")
     print("Eg. 'radiation, plasmonics, metamaterials'")
-    print("Eg. 'ALL'")
     user_queries = input("Search queries?")
-    queries = [i.strip() for i in user_queries.split(",")]
-
-    print("Please input paramater restrictions (separated by commas). Otherwise, if you want the default values, hit ENTER key again.")
-    print("Format: 'source, type_mode', 'k', 'n_gram'")
-    print("Eg. 'arxiv', 'title', '15', '2")
-    print("Eg. ''")
-    print("The first example will find the top 15 keywords (bigrams) of titles of papers from arxiv. The second example (which is the empty string) means default values.")
-    user_params = input("Query parameters?")
-
-    if user_params == "":
-        current_session.graph_keyword_freq(queries=queries)
+    if user_queries == "":
+        print("Default option indicated.")
+        queries = ["ALL"]
     else:
-        source, type_mode, k, n_gram = [i.strip() for i in user_queries.split(",")]
-        current_session.graph_keyword_freq(queries=queries, source=source, type_mode=type_mode, k=k, n_gram=n_gram)
+        queries = [i.strip() for i in user_queries.split(",")]
+    print("\n", end="")
+
+    print("Please input source restriction or restrictions (separated by commas). Hit ENTER for default.")
+    print("Default. 'ALL'")
+    print("Eg. 'arxiv, scopus'")
+    user_params = input("Query parameters?")
+    if user_params == "":
+        print("Default option indicated.")
+        sources = ["ALL"]
+    else:
+        sources = [i.strip() for i in user_params.split(",")]
+    print("\n", end="")
+
+    print("Please additional search paramaters (separated by commas). Hit ENTER for default.")
+    print("Format: 'type_mode, k, n_gram'")
+    print("Default. 'abstract, 15, 1'")
+    print("type_mode can be (title/abstract), k is the top k results returned, n_grams is number of words in token")
+    user_add_params = input("Query parameters?")
+    if user_add_params == "":
+        print("Default option indicated.")
+        type_mode, k, n_gram = "abstract", 15, 1
+    else:
+        type_mode, k, n_gram = [i.strip() for i in user_add_params.split(",")]
+    print("\n", end="")
+
+    # Function Call
+    current_session.graph_keyword_freq(queries=queries, sources=sources, type_mode=type_mode, k=int(k), n_gram=int(n_gram))
     
-    print("Completed!", end="\n\n")
+    # Return
+    print("Completed!")
+    print("\n", end="")
     return None
 
 def option_clean_dupes(dummy_var) -> None:
@@ -222,16 +295,16 @@ def menu_creator() -> dict:
     """
     # Variables
     auto_options = [
-        ["Update database by search term from arxiv", option_arxiv_update],
-        ["Visualizations by search term", option_graph_pub_freq],
-        ["Visualizations by text count", option_graph_text_count],
-        ["Visualizations by keyword frequency", option_graph_keyword_freq],
-        ["Summary of database", option_report_db_summary],
-        ["Clean dupes from database", option_clean_dupes]
+        ["[Update] Add more papers to database", option_arxiv_update],
+        ["[Analyze] See database paper distribution", option_report_db_summary],
+        ["[Analyze] See publication frequency by query", option_graph_pub_freq],
+        ["[Analyze] See keyword frequency by query", option_graph_keyword_freq],
+        ["[Analyze] See text frequency by query", option_graph_text_freq],
+        ["[Update] Remove paper dupes from database", option_clean_dupes]
     ]
     hard_options = {
-        "e": ["Exit program", option_exit],
-        "w": ["Wipe database", option_wipe],
+        "e": ["[Menu] Exit program", option_exit],
+        "w": ["[Update] Wipe entire paper database", option_wipe],
     }
     menu = {}
     for i, v in enumerate(auto_options):
@@ -262,14 +335,16 @@ def menu_print(menu: dict) -> None:
 # Main
 #----------------------------------------------------
 def main() -> None:
-    print("Welcome!")
-    current_session = eda_graphing.XForce_Grapher()
+    print("Welcome to Team NLP Research and Data Viz's Data Project!")
+    print("\n", end="")
     menu = menu_creator()
     while True:
         while True:
+            current_session = eda_graphing.XForce_Grapher()
             menu_print(menu)
             print_options = [key for key in menu.keys()]
             user_input = input(f"Pick your option: {print_options}. ")
+            print("\n", end="")
             if user_input not in menu.keys():
                 print(f"Invalid answer. Please an input within {print_options}", end="\n\n")
             else:
