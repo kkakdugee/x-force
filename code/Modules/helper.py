@@ -153,7 +153,10 @@ def remove_dupes(verbose: int=1) -> None:
         post_len = len(database)
         print(f"Removed {post_len - pre_len} duplicates ({pre_len} -> {post_len})!")
 
-    return database
+    database.to_csv("../data/complete_db.csv")
+    print("De-duplicated version saved!")
+    
+    return None
 
 def map_yes_no(input: str) -> int:
     """ 
