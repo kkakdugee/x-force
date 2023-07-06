@@ -1,4 +1,4 @@
-#----------------------------------------------------
+#----------------------------------e------------------
 # General DB Functions
 #----------------------------------------------------
 import pandas as pd
@@ -57,14 +57,14 @@ def option_arxiv_update(dummy_var) -> None:
     """
     print("Please input the search query or queries (separated by commas).")
     print("Eg. 'radiation, plasmonics, metamaterials'")
-    user_queries = input("Search queries?")
+    user_queries = input("Search queries? ")
     
     print("--")
     print("Please input the additional search parameters (separated by commas).")
     print("The format is [starting index, number of papers, report data changes (y,n), remove duplicates (y,n)]")
     print("Eg. '5, 10, n, y'")
     print("This will save the papers starting at the 5th paper and ending on the 14th paper (for total of 10 papers saved), won't show the data changes to the database, and will exclude saving duplicates.")
-    user_params = input("Query parameters?")
+    user_params = input("Query parameters? ")
 
     queries = [i.strip() for i in user_queries.split(",")]
     start, max_results, verbose, remove_dupes = [int(helper.map_yes_no(i.strip())) for i in user_params.split(",")]
@@ -88,13 +88,13 @@ def option_graph_pub_freq(current_session: eda_graphing.XForce_Grapher) -> None:
     """
     print("Please input the search query or queries (separated by commas).")
     print("Eg. 'radiation, plasmonics, metamaterials'")
-    user_queries = input("Search queries?")
+    user_queries = input("Search queries? ")
 
     print("Please input source restriction, if any. Currently, only one source can be queried at a time. If there are no restrictions, hit ENTER key again.")
     print("Eg. 'arxiv'")
     print("Eg. ''")
     print("The first example will only analyze papers pulled from arxiv. The second example (which is the empty string) means you have no restrictions and the analysis will be performed on the entire database.")
-    user_params = input("Query parameters?")
+    user_params = input("Query parameters? ")
     if user_params == "":
         user_params = "ALL"
 
@@ -196,7 +196,7 @@ def main() -> None:
         while True:
             menu_print(menu)
             print_options = [key for key in menu.keys()]
-            user_input = input(f"Pick your option: {print_options}.")
+            user_input = input(f"Pick your option: {print_options}. ")
             if user_input not in menu.keys():
                 print(f"Invalid answer. Please an input within {print_options}", end="\n\n")
             else:
