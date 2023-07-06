@@ -3,6 +3,9 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
+import sys 
+sys.path.insert(0, "../code/")
+import main as mn
 
 def main():
 
@@ -13,15 +16,7 @@ def main():
     with st.sidebar:
         option = st.selectbox(
                 'Select from below:', 
-                ['Update Database', 
-                 'Analyze Database', 
-                 'Feedback / Help'])
-
-    # Create multiple columns in main panel
-    col1, col2, col3 = st.columns([1,2,1]) # adjust as per your needs
-
-    # Display details in the left column based on the sidebar selection
-    with col1:
+                ['Update Database', 'Analyze Database', 'Feedback / Help'])
         if option == 'Update Database':
             # Add your function to update database
             st.write('This option will enable you to update the Database.')
@@ -34,52 +29,81 @@ def main():
             # Add your function to clean duplicates
             st.write('Suggestions or Bugs.')
 
-    # Create a random DataFrame
-    df = pd.DataFrame(
-        np.random.randn(20, 3),
-        columns=['a', 'b', 'c']
-    )
-
-    # Create a matplotlib plot
-    fig, ax = plt.subplots(figsize=(6, 4))  # adjust the size as needed
-    ax.scatter(df['a'], df['b'], c=df['c'], cmap='viridis')
-
-    ax.set_xlabel('a')
-    ax.set_ylabel('b')
-    ax.set_title('Scatter Plot of random values')
-
-    # Display the DataFrame and the plot in the middle column
-    with col2:
-        st.pyplot(fig)
+    # Create multiple columns in main panel
+    col1, col2 = st.columns([2,1]) 
 
     # Create buttons in the right column based on the sidebar selection
-    with col3:
-        col3.subheader("Parameters")
+    with col2:
+
+        if option == "Feedback / Help":
+            col2.subheader("")
+        else:
+            col2.subheader("Parameters")
+
         if option == 'Update Database':
-            update_options = st.selectbox(
-                'Update from:',
-                ['arXiv',
-                'Scopus',
-                'Both']
+
+            df = pd.DataFrame(
+                np.random.randn(1000, 11),
+                columns=['source', 'query', 'query_time', 'title', 'journal', 'authors', 'doi', 'published', 'abstract', 'url', 'tags']
             )
-            query = col3.text_input("Queries (Ex. radiation) (Ex. radiation,metamaterials,etc)")
-            if col3.button("Remove Duplicates from Database"):
+
+            with col1:
+                st.write(df)
+
+            update_option = st.selectbox(
+                'Update from:',
+                ['arXiv', 'Scopus', 'Both']
+            )
+
+            query = col2.text_input("Queries (Ex. radiation) (Ex. radiation,metamaterials,etc)")
+            stripped = query.replace(" ", "")
+
+            if stripped != "":
                 st.write("TODO")
-            if col3.button("Wipe Database"):
+            if col2.button("Remove Duplicates from Database"):
+                mn.option_clean_dupes("")
+            if col2.button("Wipe Database"):
                 st.write("TODO")
             
 
         elif option == 'Analyze Database':
-            analyze_options = st.selectbox(
+            analyze_option = st.selectbox(
                 'Select Visualization',
-                ['Database Summary',
-                'Search Frequency',
-                'Keyword Frequency']
+                ['Database Summary', 'Search Frequency', 'Keyword Frequency']
             )
 
+            if analyze_option == "Database Summary":
+                with col1:
+                    st.image("../images/summary.png", caption="Database Summary", use_column_width=True)
+            
+            elif analyze_option == "Search Frequency":
+
+                query = col2.text_input("Queries (Ex. radiation) (Ex. radiation,metamaterials,etc)")
+
+                stripped = query.replace(" ", "")
+
+                if stripped == "radiation":
+                    with col1:
+                        st.image("../images/radiation_arxiv.png", caption="radiation_arxiv", use_column_width=True)
+                elif stripped == "plasmonics":
+                    with col1:
+                        st.image("../images/plasmonics_arxiv.png", caption="plasmonics_arxiv", use_column_width=True)
+                elif stripped == "metamaterials":
+                    with col1:
+                        st.image("../images/metamaterials_arxiv.png", caption="metalmaterials_arxiv", use_column_width=True)
+
         elif option == 'Feedback / Help':
-            if st.button('Submit Feedback'):
-                st.write('Feedback submitted.')
+
+            with col1.form(key="my_form"):
+                st.write("Fill out this form")
+                name = st.text_input(label="Name")
+                email = st.text_input(label="Email")
+                feedback = st.text_area(label="Any suggestions or help?")
+                submit = st.form_submit_button(label="Submit Feedback")
+
+                if submit:
+                    st.write(f"Thank you for your feedback, {name}!")
+                    # handle feed back here
 
 if __name__ == "__main__":
     st.set_page_config(page_title="NDV", layout="wide")
