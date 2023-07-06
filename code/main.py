@@ -73,7 +73,7 @@ def option_arxiv_update(dummy_var) -> None:
     print("Completed!", end="\n\n")
     return None
 
-def option_visualize(current_session: eda_graphing.XForce_Grapher) -> None:
+def option_graph_pub_freq(current_session: eda_graphing.XForce_Grapher) -> None:
     """ 
     Helper function for menu-navigation; parses user inputs and then feeds into the .graph_freq() method on current_session class.
 
@@ -81,10 +81,10 @@ def option_visualize(current_session: eda_graphing.XForce_Grapher) -> None:
         The given arxiv.XForce_Grapher object for which to graph the frequencies
     
     Returns -> None
-        Runs current_session.graph_freq()
+        Runs current_session.graph_pub_freq()
 
     Example
-        option_visualize(current_session)
+        option_graph_pub_freq(current_session)
     """
     print("Please input the search query or queries (separated by commas).")
     print("Eg. 'radiation, plasmonics, metamaterials'")
@@ -100,11 +100,11 @@ def option_visualize(current_session: eda_graphing.XForce_Grapher) -> None:
 
     queries = [i.strip() for i in user_queries.split(",")]
     for query in queries:
-        current_session.graph_freq(query, user_params)
+        current_session.graph_pub_freq(query, user_params)
     print("Completed!", end="\n\n")
     return None
 
-def option_db_summary(dummy_var) -> None:
+def option_report_db_summary(current_session: eda_graphing.XForce_Grapher) -> None:
     """ 
     Helper function for menu-navigation; calls helper.db_summary().
 
@@ -117,7 +117,8 @@ def option_db_summary(dummy_var) -> None:
     Example
         option_db_summary(dummy_var)
     """
-    helper.db_summary()
+    current_session.report_db_summary()
+    current_session.graph_db_summary()
     print("Completed!", end="\n\n")
     return None
 
@@ -151,8 +152,8 @@ def menu_creator() -> dict:
     # Variables
     auto_options = [
         ["Update database by search term from arxiv", option_arxiv_update],
-        ["Visualizations by search term", option_visualize],
-        ["Summary of database", option_db_summary],
+        ["Visualizations by search term", option_graph_pub_freq],
+        ["Summary of database", option_report_db_summary],
         ["Clean dupes from database", option_clean_dupes]
     ]
     hard_options = {
