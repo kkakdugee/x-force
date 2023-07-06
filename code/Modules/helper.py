@@ -9,6 +9,7 @@ import sys
 import requests
 import feedparser
 import time
+from sklearn.feature_extraction.text import ENGLISH_STOP_WORDS
 
 #----------------------------------------------------
 # arXiv API Defaults
@@ -64,6 +65,8 @@ META_CSV_COLUMNS = ["query",
                     "target_date",
                     "date_of_last_index_extraction"
                     ]
+
+MASTER_STOP_WORDS = list(ENGLISH_STOP_WORDS).append("inf")
 
 #----------------------------------------------------
 # General DB Functions
