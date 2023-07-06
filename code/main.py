@@ -266,6 +266,76 @@ def option_graph_keyword_freq(current_session: eda_graphing.XForce_Grapher) -> N
     print("\n", end="")
     return None
 
+def option_graph_text_count(current_session: eda_graphing.XForce_Grapher) -> None:
+    """ 
+    Helper function for menu-navigation; parses user inputs and then feeds into the .graph_text_count() method on current_session class.
+
+    current_session -> arxiv.XForce_Grapher
+        The given arxiv.XForce_Grapher object for which to graph the frequencies
+    
+    Returns -> None
+        Runs current_session.graph_text_count() with given inputs
+
+    Example
+        option_graph_pub_freq(current_session)
+    """
+    print("Please input the search query or queries (separated by commas) or 'ALL' if you want to graph all.")
+    print("Eg. 'radiation, plasmonics, metamaterials'")
+    print("Eg. 'ALL'")
+    user_queries = input("Search queries?")
+    queries = [i.strip() for i in user_queries.split(",")]
+
+    print("Please input paramater restrictions (separated by commas). Otherwise, if you want the default values, hit ENTER key again.")
+    print("Format: 'source, text_mode, type_mode'")
+    print("Eg. 'arxiv', 'word', 'title'")
+    print("Eg. ''")
+    print("The first example will analyze the word count of titles of papers from arxiv. The second example (which is the empty string) means default values.")
+    user_params = input("Query parameters?")
+
+    if user_params == "":
+        current_session.graph_text_count(queries=queries)
+    else:
+        source, text_mode, type_mode = [i.strip() for i in user_queries.split(",")]
+        current_session.graph_text_count(queries=queries, source=source, text_mode=text_mode, type_mode=type_mode)
+    
+    print("Completed!", end="\n\n")
+    return None
+
+def option_graph_keyword_freq(current_session: eda_graphing.XForce_Grapher) -> None:
+    """ 
+    Helper function for menu-navigation; parses user inputs and then feeds into the .graph_keyword_freq() method on current_session class.
+
+    current_session -> arxiv.XForce_Grapher
+        The given arxiv.XForce_Grapher object for which to graph the frequencies
+    
+    Returns -> None
+        Runs current_session.graph_keyword_freq() with given inputs
+
+    Example
+        option_graph_keyword_freq(current_session)
+    """
+    print("Please input the search query or queries (separated by commas) or 'ALL' if you want to graph all.")
+    print("Eg. 'radiation, plasmonics, metamaterials'")
+    print("Eg. 'ALL'")
+    user_queries = input("Search queries?")
+    queries = [i.strip() for i in user_queries.split(",")]
+
+    print("Please input paramater restrictions (separated by commas). Otherwise, if you want the default values, hit ENTER key again.")
+    print("Format: 'source, type_mode', 'k', 'n_gram'")
+    print("Eg. 'arxiv', 'title', '15', '2")
+    print("Eg. ''")
+    print("The first example will find the top 15 keywords (bigrams) of titles of papers from arxiv. The second example (which is the empty string) means default values.")
+    user_params = input("Query parameters?")
+
+    if user_params == "":
+        current_session.graph_keyword_freq(queries=queries)
+    else:
+        source, type_mode, k, n_gram = [i.strip() for i in user_queries.split(",")]
+        current_session.graph_keyword_freq(queries=queries, source=source, type_mode=type_mode, k=k, n_gram=n_gram)
+    
+    print("Completed!", end="\n\n")
+    return None
+
 def option_clean_dupes(dummy_var) -> None:
     """ 
     Helper function for menu-navigation; calls helper.remove_dupes().

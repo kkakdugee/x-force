@@ -426,6 +426,203 @@ class XForce_Grapher():
         plt.show()
 
         return None
+    
+    def load_nlp_summary(self) -> None:
+        """
+        Creates and saves the NLP summary report in class variable.
+
+        Returns -> None
+            Saves the NLP summary report.
+        
+        Example
+            grapher = XForce_Grapher()
+            grapher.load_nlp_summary()
+        """
+        # Filtering
+        df = self._data.copy()
+        df = df[["source", "query", "published", "url", "title", "abstract"]]
+
+        # Cleaning
+        df.dropna(inplace=True)
+        df.loc[:, "title"] = df.loc[:, "title"].map(lambda x: x.lower())
+        df.loc[:, "abstract"] = df.loc[:, "abstract"].map(lambda x: x.lower())
+        punctuation = ["?", "‘", "’", "'", ",", ".", "“", '"', "”", "[", "]", "(", ")", "/"]
+        for mark in punctuation:
+            df.loc[:, "title"] = df.loc[:, "title"].str.replace(mark, "", regex=True)
+            df.loc[:, "abstract"] = df.loc[:, "abstract"].str.replace(mark, "", regex=True)
+
+        # Feature Engineering
+        df["title_char_count"] = df.loc[:, "title"].map(lambda x: len(x))
+        df["title_word_count"] = df.loc[:, "title"].map(lambda x: len(x.split(" ")))
+        df["abstract_char_count"] = df.loc[:, "abstract"].map(lambda x: len(x))
+        df["abstract_word_count"] = df.loc[:, "abstract"].map(lambda x: len(x.split(" ")))
+
+        # Saving
+        self._nlp_summary = df
+        
+        # Return
+        return None
+    
+    def graph_text_count(self, 
+                         queries: list=["ALL"], 
+                         source: str="ALL", 
+                         text_mode: str="word", 
+                         type_mode: str="abstract") -> None:
+        """
+        Graphs the text_mode (character or word) count of type_mode (title or abstract) of paper entries. 
+
+        queries -> list
+            Given list of queries to graph on
+            If list contains the string "ALL", it will graph every query
+
+        source -> str
+            Given source to filter on
+            If given string is "ALL", then it will graph from all sources
+
+        type_mode -> str
+            Given type mode to filter on
+            "title": Graphs on title
+            "abstract": Graphs on abstract
+
+        text_mode -> str
+            Given type mode to filter on
+            "char": Graphs via character count
+            "word": Graphs via word count
+
+        Returns -> None
+            Shows matplotlib graph of the text counts
+        
+        Example
+            grapher = XForce_Grapher()
+            grapher.graph_text_count(queries=["radiation", "plasmonics"], source="arxiv", text_mode="word", type_mode="abstract")
+        """
+        text_mode_options = {"char", "word"}
+        if text_mode not in text_mode_options:
+            raise ValueError(f"{text_mode} invalid; must be {text_mode_options}")
+
+        type_mode_options = {"title", "abstract"}
+        if type_mode not in type_mode_options:
+            raise ValueError(f"{type_mode} invalid; must be {type_mode_options}")
+
+        if source not in self._sources:
+            raise ValueError(f"{source} invalid, must be {self._sources}")
+        
+        for query in queries:
+            if query not in self._queries:
+                raise ValueError(f"{query} in queries list invalid, must be {self._queries}")
+
+        df = self._nlp_summary.copy()
+        if source != "ALL":
+            df = df[df["source"] == source]
+
+        title_label = queries
+        if "ALL" in queries:
+            queries = self._queries.copy()
+            title_label = "ALL"
+
+        expression = f"{type_mode}_{text_mode}_count"
+
+        graph_data = []
+        for query in queries:
+            graph_data.append(df[df["query"] == query][expression])
+
+        plt.title(f"Source: {source}, Query: {title_label}")
+        plt.suptitle(f"Summary Statistics of {type_mode.title()} {text_mode.title()} Count by Specified Papers")
+        plt.xlabel("Query")
+        plt.ylabel("Count")
+        plt.grid("True")
+        plt.xticks(rotation=45)
+        plt.boxplot(graph_data, positions=np.array(range(len(graph_data)))*2.0, sym='', widths=1.5)
+        plt.xticks(range(0, len(queries)*2, 2), queries, rotation=45)
+        plt.show()
+
+        return None
+    
+    def graph_keyword_freq(self, 
+                           queries: list=["ALL"], 
+                           source: str="ALL", 
+                           type_mode: str="abstract", 
+                           k: int=15, 
+                           n_gram: int=1, 
+                           stop_words: set=helper.MASTER_STOP_WORDS) -> None:
+        """
+        Graphs the keyword frequency of the specified papers. 
+
+        queries -> list
+            Given list of queries to graph on
+            If list contains the string "ALL", it will graph every query
+
+        source -> str
+            Given source to filter on
+            If given string is "ALL", then it will graph from all sources
+
+        type_mode -> str
+            Given type mode to filter on
+            "title": Graphs on title
+            "abstract": Graphs on abstract
+
+        k -> int
+            The number of top n-grams to be graphed
+
+        n_gram -> int
+            The n-grams to graph on
+
+        stop_words -> set
+            The set of stop_words to use in the CountVectorizer()
+
+        Returns -> None
+            Shows matplotlib graph of the text counts
+        
+        Example
+            grapher = XForce_Grapher()
+            grapher.graph_text_count(queries=["radiation", "plasmonics"], source="arxiv", type_mode="abstract", k=15, n_grams=1)
+        """
+        df = self._nlp_summary.copy()
+
+        type_mode_options = {"title", "abstract"}
+        if type_mode not in type_mode_options:
+            raise ValueError(f"{type_mode} invalid; must be {type_mode_options}")
+
+        if source not in self._sources:
+            raise ValueError(f"{source} invalid, must be {self._sources}")
+        
+        for item in queries:
+            if item not in self._queries:
+                raise ValueError(f"{item} in your queries list invalid, must be {self._queries}")
+
+        if source != "ALL":
+            df = df[df["source"] == source]
+
+        if "ALL" in queries:
+            queries = self._queries.copy()
+            title_label = "ALL"
+        else:
+            condition_prefix = "df['query'] == "
+            expression = " | ".join([f"({condition_prefix}'{query}')" for query in queries])
+            df = df[eval(expression)]
+            title_label = queries
+
+        X = df.loc[:, type_mode]
+        cvec = CountVectorizer(stop_words=stop_words, ngram_range=(n_gram, n_gram))
+        X_cvec_dense = cvec.fit_transform(X).todense()
+        X_cvec_df = pd.DataFrame(X_cvec_dense, columns=cvec.get_feature_names_out())
+
+        # graphing
+        graph_data = X_cvec_df.sum().sort_values(ascending=False).head(k)
+        plt.title(f"Top {k} Most Common {n_gram}-Grams in Papers from Given Queries")
+        plt.suptitle(f"Source: {source}, Query: {title_label}")
+        plt.xlabel("Count")
+        plt.xticks(rotation=90)
+        plt.ylabel("Tokens")
+        plt.grid(True)
+        plt.barh(graph_data.index[::-1], graph_data.values[::-1], alpha=0.5)
+
+        # saving
+        plt.tight_layout()
+        # plt.savefig(f"../images/most_common_{n_gram}_grams_{subreddit}.png")
+        plt.show()
+
+        return None
 
 #----------------------------------------------------
 # Module Checking
