@@ -41,7 +41,7 @@ def parse_data(data) -> List[Dict[str, str]]:
         journal = field.get('prism:aggregationType', 'N/A')
         doi = field.get('prism:doi', 'N/A')
         authors = field.get('dc:creator', 'N/A') # for author in field.get('author', [])]
-        published = field.get('prism:coverDate', 'N/A')[:4]
+        published = field.get('prism:coverDate', 'N/A')
         pii = field.get('pii', "N/A")
         url = 'https://www.sciencedirect.com/science/article/abs/pii/' + str(pii)
         abstract = scopus_scraper.get_abstract(url)
