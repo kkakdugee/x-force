@@ -7,6 +7,7 @@ import requests
 import feedparser
 import time
 from datetime import datetime
+from sklearn.feature_extraction.text import CountVectorizer, ENGLISH_STOP_WORDS
 import sys
 sys.path.append("../code/Modules/")
 import helper
@@ -81,44 +82,114 @@ def option_graph_pub_freq(current_session: eda_graphing.XForce_Grapher) -> None:
         The given arxiv.XForce_Grapher object for which to graph the frequencies
     
     Returns -> None
-        Runs current_session.graph_pub_freq()
+        Runs current_session.graph_pub_freq() with given inputs
 
     Example
         option_graph_pub_freq(current_session)
     """
-    print("Please input the search query or queries (separated by commas).")
-    print("Eg. 'radiation, plasmonics, metamaterials'")
-    user_queries = input("Search queries? ")
+    print("Please input your search query.")
+    print("Eg. 'radiation'")
+    query = input("Search query?")
 
     print("Please input source restriction, if any. Currently, only one source can be queried at a time. If there are no restrictions, hit ENTER key again.")
     print("Eg. 'arxiv'")
     print("Eg. ''")
     print("The first example will only analyze papers pulled from arxiv. The second example (which is the empty string) means you have no restrictions and the analysis will be performed on the entire database.")
-    user_params = input("Query parameters? ")
-    if user_params == "":
-        user_params = "ALL"
+    source = input("Query parameters?")
+    if source == "":
+        source = "ALL"
 
-    queries = [i.strip() for i in user_queries.split(",")]
-    for query in queries:
-        current_session.graph_pub_freq(query, user_params)
+    # queries = [i.strip() for i in user_queries.split(",")]
+    current_session.graph_pub_freq(query=query, source=source)
     print("Completed!", end="\n\n")
     return None
 
 def option_report_db_summary(current_session: eda_graphing.XForce_Grapher) -> None:
     """ 
-    Helper function for menu-navigation; calls helper.db_summary().
+    Helper function for menu-navigation; runs the db_sumarry methods on current_session class.
 
-    This asks for a dummy_var argument because option_visualize() requires an actual variable.
-    Due to limitations of Python's try-except block, adding a dummy variable to this function ensures a workaround for an "all-cases" user input.
-
+    current_session -> arxiv.XForce_Grapher
+        The given arxiv.XForce_Grapher object for which to graph the frequencies
+    
     Returns -> None
-        Runs helper.db_summary().
+        Runs current_session.report_db_summary()
+        Runs current_session.graph_db_summary()
 
     Example
-        option_db_summary(dummy_var)
+        option_graph_pub_freq(current_session)
     """
     current_session.report_db_summary()
     current_session.graph_db_summary()
+    print("Completed!", end="\n\n")
+    return None
+
+def option_graph_text_count(current_session: eda_graphing.XForce_Grapher) -> None:
+    """ 
+    Helper function for menu-navigation; parses user inputs and then feeds into the .graph_text_count() method on current_session class.
+
+    current_session -> arxiv.XForce_Grapher
+        The given arxiv.XForce_Grapher object for which to graph the frequencies
+    
+    Returns -> None
+        Runs current_session.graph_text_count() with given inputs
+
+    Example
+        option_graph_pub_freq(current_session)
+    """
+    print("Please input the search query or queries (separated by commas) or 'ALL' if you want to graph all.")
+    print("Eg. 'radiation, plasmonics, metamaterials'")
+    print("Eg. 'ALL'")
+    user_queries = input("Search queries?")
+    queries = [i.strip() for i in user_queries.split(",")]
+
+    print("Please input paramater restrictions (separated by commas). Otherwise, if you want the default values, hit ENTER key again.")
+    print("Format: 'source, text_mode, type_mode'")
+    print("Eg. 'arxiv', 'word', 'title'")
+    print("Eg. ''")
+    print("The first example will analyze the word count of titles of papers from arxiv. The second example (which is the empty string) means default values.")
+    user_params = input("Query parameters?")
+
+    if user_params == "":
+        current_session.graph_text_count(queries=queries)
+    else:
+        source, text_mode, type_mode = [i.strip() for i in user_queries.split(",")]
+        current_session.graph_text_count(queries=queries, source=source, text_mode=text_mode, type_mode=type_mode)
+    
+    print("Completed!", end="\n\n")
+    return None
+
+def option_graph_keyword_freq(current_session: eda_graphing.XForce_Grapher) -> None:
+    """ 
+    Helper function for menu-navigation; parses user inputs and then feeds into the .graph_keyword_freq() method on current_session class.
+
+    current_session -> arxiv.XForce_Grapher
+        The given arxiv.XForce_Grapher object for which to graph the frequencies
+    
+    Returns -> None
+        Runs current_session.graph_keyword_freq() with given inputs
+
+    Example
+        option_graph_keyword_freq(current_session)
+    """
+    print("Please input the search query or queries (separated by commas) or 'ALL' if you want to graph all.")
+    print("Eg. 'radiation, plasmonics, metamaterials'")
+    print("Eg. 'ALL'")
+    user_queries = input("Search queries?")
+    queries = [i.strip() for i in user_queries.split(",")]
+
+    print("Please input paramater restrictions (separated by commas). Otherwise, if you want the default values, hit ENTER key again.")
+    print("Format: 'source, type_mode', 'k', 'n_gram'")
+    print("Eg. 'arxiv', 'title', '15', '2")
+    print("Eg. ''")
+    print("The first example will find the top 15 keywords (bigrams) of titles of papers from arxiv. The second example (which is the empty string) means default values.")
+    user_params = input("Query parameters?")
+
+    if user_params == "":
+        current_session.graph_keyword_freq(queries=queries)
+    else:
+        source, type_mode, k, n_gram = [i.strip() for i in user_queries.split(",")]
+        current_session.graph_keyword_freq(queries=queries, source=source, type_mode=type_mode, k=k, n_gram=n_gram)
+    
     print("Completed!", end="\n\n")
     return None
 
@@ -153,6 +224,8 @@ def menu_creator() -> dict:
     auto_options = [
         ["Update database by search term from arxiv", option_arxiv_update],
         ["Visualizations by search term", option_graph_pub_freq],
+        ["Visualizations by text count", option_graph_text_count],
+        ["Visualizations by keyword frequency", option_graph_keyword_freq],
         ["Summary of database", option_report_db_summary],
         ["Clean dupes from database", option_clean_dupes]
     ]
