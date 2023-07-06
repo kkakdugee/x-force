@@ -8,7 +8,7 @@ import feedparser
 import time
 from datetime import datetime
 import sys
-sys.path.append(".Modules/")
+sys.path.append("../code/Modules/")
 import helper
 import arxiv
 import eda_graphing
@@ -74,7 +74,6 @@ def option_arxiv_update(dummy_var) -> None:
     return None
 
 def option_visualize(current_session: eda_graphing.XForce_Grapher) -> None:
-def option_visualize(current_session: eda_graphing.XForce_Grapher) -> None:
     """ 
     Helper function for menu-navigation; parses user inputs and then feeds into the .graph_freq() method on current_session class.
 
@@ -89,13 +88,13 @@ def option_visualize(current_session: eda_graphing.XForce_Grapher) -> None:
     """
     print("Please input the search query or queries (separated by commas).")
     print("Eg. 'radiation, plasmonics, metamaterials'")
-    user_queries = input("Search queries?", end="\n\n")
+    user_queries = input("Search queries? ")
 
     print("Please input source restriction, if any. Currently, only one source can be queried at a time. If there are no restrictions, hit ENTER key again.")
     print("Eg. 'arxiv'")
     print("Eg. ''")
     print("The first example will only analyze papers pulled from arxiv. The second example (which is the empty string) means you have no restrictions and the analysis will be performed on the entire database.")
-    user_params = input("Query parameters?", end="\n\n")
+    user_params = input("Query parameters? ")
     if user_params == "":
         user_params = "ALL"
 
@@ -196,7 +195,7 @@ def main() -> None:
         while True:
             menu_print(menu)
             print_options = [key for key in menu.keys()]
-            user_input = input(f"Pick your option: {print_options}.")
+            user_input = input(f"Pick your option: {print_options}. ")
             if user_input not in menu.keys():
                 print(f"Invalid answer. Please an input within {print_options}", end="\n\n")
             else:
