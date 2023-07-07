@@ -9,7 +9,7 @@ import time
 from datetime import datetime
 from sklearn.feature_extraction.text import CountVectorizer, ENGLISH_STOP_WORDS
 import sys
-sys.path.append("../code/Modules/")
+sys.path.append("./Modules/")
 import helper
 import arxiv
 import eda_graphing
