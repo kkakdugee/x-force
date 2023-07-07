@@ -10,7 +10,7 @@ import random
 import sys
 
 # Helper modules
-sys.path.append("./code/Modules/")
+sys.path.append("../code/Modules/")
 import helper
 import scopus_scraper
 
@@ -45,7 +45,6 @@ def parse_data(data) -> List[Dict[str, str]]:
         pii = field.get('pii', "N/A")
         url = 'https://www.sciencedirect.com/science/article/abs/pii/' + str(pii)
         abstract = scopus_scraper.get_abstract(url)
-
         affiliation_data = field.get('affiliation', [{}])[0]
         country = affiliation_data.get('affiliation-country', 'N/A')
         school = affiliation_data.get('affilname', 'N/A')
@@ -84,7 +83,7 @@ def search() -> None:
 
     seen_dois = set()
 
-    data_path = './data/complete_db.csv'
+    data_path = '../data/complete_db.csv'
 
     with open(data_path, 'a', newline='', encoding='utf-8') as file:
         writer = csv.DictWriter(file, fieldnames=helper.MASTER_CSV_COLUMNS)
@@ -97,12 +96,10 @@ def search() -> None:
                 entries = parse_data(data)
                 
                 for entry in entries:
-                    if entry['doi'] not in seen_dois:
-                        writer.writerow(entry)
-                        seen_dois.add(entry['doi'])
+                    writer.writerow(entry)
                         
                 parameters['start'] += 25
-                time.sleep(random.uniform(1, 3))
+                time.sleep(random.uniform(1, 2))
             else:
                 print("Failed:", response.status_code)
                 break
