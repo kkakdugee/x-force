@@ -15,7 +15,7 @@ import helper
 def main():
 
     # Title of the web app
-    st.title('NLP Data Tool')
+    st.title('Team NLP Research & Data Viz')
 
     # Create a sidebar with a selection box
     with st.sidebar:
@@ -57,7 +57,7 @@ def main():
 
             update_option = st.selectbox(
                 'Update from:',
-                ['arXiv', 'Scopus', 'Both']
+                ['arXiv', 'Scopus', 'ALL']
             )
 
             query = col2.text_input("Queries (Ex. radiation) (Ex. radiation,metamaterials,etc)")
@@ -70,9 +70,9 @@ def main():
 
                     status.write(f"Pulling data from {update_option}...")
 
-                    if update_option == "arXiv" or update_option == "Both":
+                    if update_option == "arXiv" or update_option == "ALL":
                         arxiv.pull_requests(stripped, 0, 25, 1, 1)
-                    if update_option == "Scopus" or update_option == "Both":
+                    if update_option == "Scopus" or update_option == "ALL":
                         scopus.pull_requests(stripped, 0, 25)
                     
                     status.write(f"Succesfully obtained {query} data from {update_option}!")
@@ -114,33 +114,19 @@ def main():
 
             analyze_option = st.selectbox(
                 'Select Visualization',
-                ['Database Summary', 'Search Frequency', 'Keyword Frequency', 'Publish Frequency', 'Text Frequency']
+                ['Database Summary', 'Keyword Frequency', 'Publish Frequency', 'Text Frequency']
             )
 
             if analyze_option != "Database Summary":
 
                 db_option = st.selectbox(
                     'From:',
-                    ['arXiv', 'Scopus', 'Both']
+                    ['arXiv', 'Scopus', 'ALL']
                 )
 
             if analyze_option == "Database Summary":
                 with col1:
                     st.image("../images/summary.png", caption="Database Summary", use_column_width=True)
-            
-            elif analyze_option == "Search Frequency":
-
-                query = col2.text_input("Queries (Ex. ALL) (Ex. radiation,metamaterials,etc)")
-
-                if query == "radiation":
-                    with col1:
-                        st.image("../images/radiation_arxiv.png", caption="radiation_arxiv", use_column_width=True)
-                elif query == "plasmonics":
-                    with col1:
-                        st.image("../images/plasmonics_arxiv.png", caption="plasmonics_arxiv", use_column_width=True)
-                elif query == "metamaterials":
-                    with col1:
-                        st.image("../images/metamaterials_arxiv.png", caption="metalmaterials_arxiv", use_column_width=True)
 
             elif analyze_option == "Keyword Frequency":
 
