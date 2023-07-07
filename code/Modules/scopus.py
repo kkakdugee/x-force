@@ -71,44 +71,41 @@ def parse_data(data) -> List[Dict[str, str]]:
     return parsed
 
 # Function to search Scopus API
-def search() -> None:
-
-    # Define parameters for API request
-    parameters = {
-        'query': 'metamaterials', # helper.DEFAULT_SEARCH_QUERY
-        'view': 'STANDARD', # COMPLETE
-        'count': 25,
-        'start': 0
-    }
-
-    seen_dois = set()
+def pull_requests(queries, start, max_result) -> None:
 
     data_path = '../data/complete_db.csv'
 
     with open(data_path, 'a', newline='', encoding='utf-8') as file:
         writer = csv.DictWriter(file, fieldnames=helper.MASTER_CSV_COLUMNS)
-        
-        while parameters['start'] != 550:
-            response = requests.get(SCOPUS_URL, headers=HEADERS, params=parameters)
-            if response.status_code == 200:
-                query_time = datetime.now()
-                data = response.json()
-                entries = parse_data(data)
-                
-                for entry in entries:
-                    writer.writerow(entry)
-                        
-                parameters['start'] += 25
-                time.sleep(random.uniform(1, 2))
-            else:
-                print("Failed:", response.status_code)
-                break
 
-    print("Data saved into complete_db.csv")
+        for query in queries:
+
+            # Define parameters for API request
+            parameters = {
+                'query': query, # helper.DEFAULT_SEARCH_QUERY
+                'view': 'STANDARD', # COMPLETE
+                'count': 25,
+                'start': 0
+            }
+
+            while parameters['start'] < max_result:
+                response = requests.get(SCOPUS_URL, headers=HEADERS, params=parameters)
+                if response.status_code == 200:
+                    query_time = datetime.now()
+                    data = response.json()
+                    entries = parse_data(data)
+
+                    for entry in entries:
+                        writer.writerow(entry)
+
+                    parameters['start'] += 25
+                    time.sleep(random.uniform(1, 2))
+                else:
+                    print("Failed:", response.status_code)
+                    break
+
+        print("Data saved into complete_db.csv")
 
     
-
-if __name__ == "__main__":
-    search()
 
 
