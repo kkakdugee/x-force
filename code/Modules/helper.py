@@ -66,7 +66,9 @@ META_CSV_COLUMNS = ["query",
                     "date_of_last_index_extraction"
                     ]
 
-MASTER_STOP_WORDS = list(ENGLISH_STOP_WORDS).append("inf")
+TEMP_STOP_WORDS = list(ENGLISH_STOP_WORDS)
+TEMP_STOP_WORDS.append("inf")
+MASTER_STOP_WORDS = TEMP_STOP_WORDS
 
 #----------------------------------------------------
 # General DB Functions
@@ -153,6 +155,36 @@ def map_yes_no(input: str) -> int:
         return 0
     else:
         return input
+    
+def generate_boolean_conditions(mode: str, conditions: list) -> str:
+    """ 
+    Given list of conditions, generate the boolean syntax for a dataframe.
+
+    mode -> str
+        The given mode
+        query: Boolean expression is created with indexing into query column
+        source: Boolean expression is created with indexing into source column
+
+    conditions -> list
+        The given list of conditions
+    
+    Returns -> str
+        Returns the condition expressions
+    
+    Example
+        generate_boolean_conditions("query", ["radiation", "plasmonics"])
+    """
+    # Input Error Handling
+    mode_options = {"query", "source"}
+    if mode not in mode_options:
+        raise ValueError(f"{mode} invalid, must be {mode_options}")
+    
+    # Function
+    condition_prefix = f"df['{mode}'] == "
+    expression = " | ".join([f"({condition_prefix}'{condition}')" for condition in conditions])
+    
+    # Return
+    return expression
 
 #----------------------------------------------------
 # Module Checking
