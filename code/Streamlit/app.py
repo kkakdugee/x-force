@@ -1,36 +1,40 @@
-# Import necessary libraries
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 import sys 
-sys.path.insert(0, "../code/")
-import main as mn
+import time
+
+sys.path.append("../code/Modules")
+import arxiv
+import scopus
+import helper
+
+
 
 def main():
 
     # Title of the web app
-    st.title('NLP Data Tool')
+    st.title('Team NLP Research & Data Viz')
 
     # Create a sidebar with a selection box
     with st.sidebar:
+
         option = st.selectbox(
                 'Select from below:', 
                 ['Update Database', 'Analyze Database', 'Feedback / Help'])
+
         if option == 'Update Database':
-            # Add your function to update database
             st.write('This option will enable you to update the Database.')
 
         elif option == 'Analyze Database':
-            # Add your function to do visualizations
             st.write('This option will enable you to view visualizations of the Database.')
 
         elif option == 'Feedback / Help':
-            # Add your function to clean duplicates
             st.write('Suggestions or Bugs.')
 
     # Create multiple columns in main panel
-    col1, col2 = st.columns([2,1]) 
+    col1, col2 = st.columns([3,1]) 
 
     # Create buttons in the right column based on the sidebar selection
     with col2:
@@ -42,55 +46,120 @@ def main():
 
         if option == 'Update Database':
 
-            df = pd.DataFrame(
-                np.random.randn(1000, 11),
-                columns=['source', 'query', 'query_time', 'title', 'journal', 'authors', 'doi', 'published', 'abstract', 'url', 'tags']
-            )
+            df = pd.read_csv('../data/complete_db.csv')
+
+            max_rows = df.shape[0]
+
+            rows_to_display = st.sidebar.slider("Select the number of rows to display", 1, max_rows, value=10)
 
             with col1:
-                st.write(df)
+                st.dataframe(df.head(rows_to_display))
 
             update_option = st.selectbox(
                 'Update from:',
-                ['arXiv', 'Scopus', 'Both']
+                ['arXiv', 'Scopus', 'ALL']
             )
 
             query = col2.text_input("Queries (Ex. radiation) (Ex. radiation,metamaterials,etc)")
-            stripped = query.replace(" ", "")
+            stripped = [i.strip() for i in query.split(",")]
 
-            if stripped != "":
-                st.write("TODO")
+            if col2.button("Submit"):
+                 if stripped != "":
+
+                    status = st.empty()
+
+                    status.write(f"Pulling data from {update_option}...")
+
+                    if update_option == "arXiv" or update_option == "ALL":
+                        arxiv.pull_requests(stripped, 0, 25, 1, 1)
+                    if update_option == "Scopus" or update_option == "ALL":
+                        scopus.pull_requests(stripped, 0, 25)
+                    
+                    status.write(f"Succesfully obtained {query} data from {update_option}!")
+
+                    time.sleep(2.5)
+                    status.empty()
+
+            st.write("")
+            st.write("")
+
             if col2.button("Remove Duplicates from Database"):
-                mn.option_clean_dupes("")
+
+                status = st.empty()
+
+                status.write("Removing duplicate entries from Database...")
+                helper.remove_dupes()
+                status.write("Succesfully removed duplicate entries from Database!")
+                
+                time.sleep(2.5)
+                status.empty()
+
             if col2.button("Wipe Database"):
-                st.write("TODO")
+
+                status = st.empty()
+
+                status.write("Are you sure? This action cannot be undone.")
+
+                yes_or_no = st.columns([1,1])
+
+                if yes_or_no[0].button("Yes"):
+                    status.write("Wiping Database...")
+                if yes_or_no[1].button("No"):
+                    status.write("")
+            
+                status.empty()
             
 
         elif option == 'Analyze Database':
+
             analyze_option = st.selectbox(
                 'Select Visualization',
-                ['Database Summary', 'Search Frequency', 'Keyword Frequency']
+                ['Database Summary', 'Keyword Frequency', 'Publish Frequency', 'Text Frequency']
             )
+
+            if analyze_option != "Database Summary":
+
+                db_option = st.selectbox(
+                    'From:',
+                    ['arXiv', 'Scopus', 'ALL']
+                )
 
             if analyze_option == "Database Summary":
                 with col1:
                     st.image("../images/summary.png", caption="Database Summary", use_column_width=True)
-            
-            elif analyze_option == "Search Frequency":
 
-                query = col2.text_input("Queries (Ex. radiation) (Ex. radiation,metamaterials,etc)")
+            elif analyze_option == "Keyword Frequency":
 
-                stripped = query.replace(" ", "")
+                query = col2.text_input("Queries (Ex. ALL) (Ex. radiation,metamaterials,etc)")
 
-                if stripped == "radiation":
+                if query == "AI,infrared,photon":
                     with col1:
-                        st.image("../images/radiation_arxiv.png", caption="radiation_arxiv", use_column_width=True)
-                elif stripped == "plasmonics":
+                        st.image("../images/keyword_freq/keyword_freq_ALL_AI_infrared_photon.png", caption="Keyword Frequency of AI, infrared, photon in all databases", use_column_width=True)
+                elif query == "ALL":
                     with col1:
-                        st.image("../images/plasmonics_arxiv.png", caption="plasmonics_arxiv", use_column_width=True)
-                elif stripped == "metamaterials":
+                        st.image("../images/keyword_freq/keyword_freq_ALL_ALL.png", caption="Keyword Frequency of all queries in all databases", use_column_width=True)
+                
+            elif analyze_option == "Publish Frequency":
+
+                query = col2.text_input("Queries (Ex. ALL) (Ex. radiation,metamaterials,etc)")
+
+                if query == "ALL":
                     with col1:
-                        st.image("../images/metamaterials_arxiv.png", caption="metalmaterials_arxiv", use_column_width=True)
+                        st.image("../images/pub_freq/pub_freq_arxiv_ALL.png", caption="Publish Frequency of all queries in arXiv", use_column_width=True)
+                elif query == "radiation,plasmonics,metamaterials":
+                    with col1:
+                        st.image("../images/pub_freq/pub_freq_arxiv_radiation_plasmonics_metamaterials.png", caption="Publish Frequency of radiation, plasmonics, metamaterials in arXiv", use_column_width=True)
+
+            elif analyze_option == "Text Frequency":
+
+                query = col2.text_input("Queries (Ex. ALL) (Ex. radiation,metamaterials,etc)")
+
+                if query == "ALL":
+                    with col1:
+                        st.image("../images/text_freq/text_freq_ALL_ALL.png", caption="Text Frequency of all queries in all databases", use_column_width=True)
+                elif query == "plasmonics,heavy ion":
+                    with col1:
+                        st.image("../images/text_freq/text_freq_ALL_plasmonics_heavy ion.png", caption="Text Frequency of plasmonics, heavy ion in all databases", use_column_width=True)
 
         elif option == 'Feedback / Help':
 
