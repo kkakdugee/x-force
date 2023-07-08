@@ -72,9 +72,11 @@ class XForce_Grapher():
 
     def graph_pub_freq(self, 
                        queries: list=["ALL"], 
-                       sources: list=["ALL"]) -> None:
+                       sources: list=["ALL"],
+                       country_mode: int=1) -> None:
         """
         # TODO Fix scopus date. Do not you run "ALL" for sources.
+        # TODO Add country_mode
 
         Graphs the publishing frequency of papers in the database.
 
@@ -86,14 +88,23 @@ class XForce_Grapher():
             The given list of search sources (can be a 1-item list) that match database sources
             ALL: Considers all sources
 
+        country_mode -> int
+            0: graphs the bars of the bar chart as normal bars
+            1: graphs the bars of the bar chart as stacked bar charts corresponding to country of publishing institution
+
         Returns -> None
             Shows matplotlib graph of the published frequency
         
         Example
             grapher = XForce_Grapher()
-            grapher.graph_pub_freq(["ALL"], ["ALL"])
+            grapher.graph_pub_freq(["ALL"], ["ALL"], 1)
         """
         # Input Error Handling
+        country_mode_options = {0,1}
+        if country_mode not in country_mode_options:
+            print(f"{country_mode} invalid, must be {country_mode_options}")
+            return None
+
         for source in sources:
             if source not in self._sources:
                 raise ValueError(f"{source} invalid, must be {self._sources}")
