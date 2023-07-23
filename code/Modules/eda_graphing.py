@@ -9,6 +9,7 @@ import feedparser
 import time
 from datetime import datetime
 import sys
+import streamlit as st
 import helper
 from sklearn.feature_extraction.text import CountVectorizer, ENGLISH_STOP_WORDS
 
@@ -70,9 +71,9 @@ class XForce_Grapher():
         self._queries = queries
         return None
 
-    def graph_pub_freq(self, 
+    def graph_pub_freq(self,
                        queries: list=["ALL"], 
-                       sources: list=["ALL"]) -> None:
+                       sources: list=["ALL"]) -> str:
         """
         # TODO Fix scopus date. Do not you run "ALL" for sources.
 
@@ -86,13 +87,14 @@ class XForce_Grapher():
             The given list of search sources (can be a 1-item list) that match database sources
             ALL: Considers all sources
 
-        Returns -> None
-            Shows matplotlib graph of the published frequency
+        Returns -> str
+            Shows matplotlib graph of the published frequency, and returns the generated plot path
         
         Example
             grapher = XForce_Grapher()
             grapher.graph_pub_freq(["ALL"], ["ALL"])
         """
+
         # Input Error Handling
         for source in sources:
             if source not in self._sources:
@@ -133,7 +135,7 @@ class XForce_Grapher():
         plt.show()
 
         # Return
-        return None
+        return f"../images/pub_freq/pub_freq_{'_'.join(title_sources)}_{'_'.join(title_queries)}.png"
 
     def load_db_summary(self) -> None:
         """
@@ -180,17 +182,18 @@ class XForce_Grapher():
         print(self._summary)
         return None
 
-    def graph_db_summary(self) -> None:
+    def graph_db_summary(self) -> str:
         """
         Graphs the report summary as a stacked barchart.
 
-        Returns -> None
-            Prints out matplotlib graph of the report summary
+        Returns -> str
+            Shows matplotlib graph of the report summary, and returns the generated plot path
         
         Example
             grapher = XForce_Grapher()
             grapher.graph_db_summary()
         """
+
         df = self._summary.copy()
         extract_counts = df.T.values.tolist()[1:-1] # -1 to remove the "ALL" from the category
         extract_queries = df.T.index.tolist()[1:-1]
@@ -217,7 +220,7 @@ class XForce_Grapher():
         plt.savefig(f"../images/db_summ/db_summ.png")
         plt.show()
 
-        return None
+        return "../images/db_summ/db_summ.png"
     
     def load_nlp_summary(self) -> None:
         """
@@ -238,7 +241,7 @@ class XForce_Grapher():
         df.dropna(inplace=True)
         df.loc[:, "title"] = df.loc[:, "title"].map(lambda x: x.lower())
         df.loc[:, "abstract"] = df.loc[:, "abstract"].map(lambda x: x.lower())
-        punctuation = ["?", "‘", "’", "'", ",", ".", "“", '"', "”", "[", "]", "(", ")", "/"]
+        punctuation = ["\?", "‘", "’", "'", ",", "\.", "“", '"', "”", "\[", "\]", "\(", "\)", "\/"]
         for mark in punctuation:
             df.loc[:, "title"] = df.loc[:, "title"].str.replace(mark, "", regex=True)
             df.loc[:, "abstract"] = df.loc[:, "abstract"].str.replace(mark, "", regex=True)
@@ -255,11 +258,11 @@ class XForce_Grapher():
         # Return
         return None
     
-    def graph_text_freq(self, 
+    def graph_text_freq(self,
                          queries: list=["ALL"], 
                          sources: list=["ALL"], 
                          text_mode: str="word", 
-                         type_mode: str="abstract") -> None:
+                         type_mode: str="abstract") -> str:
         """
         Graphs the text frequency (eg. character/word count of title/abstract) of indicated papers
 
@@ -281,13 +284,14 @@ class XForce_Grapher():
             "title": Graphs on title
             "abstract": Graphs on abstract
 
-        Returns -> None
-            Shows matplotlib graph of the text counts
+        Returns -> str
+            Shows matplotlib graph of the text counts, and returns the generated plot path
         
         Example
             grapher = XForce_Grapher()
             grapher.graph_text_freq(queries=["radiation", "plasmonics"], source=["arxiv"], text_mode="word", type_mode="abstract")
         """
+
         # Input Error Handling
         for source in sources:
             if source not in self._sources:
@@ -340,15 +344,15 @@ class XForce_Grapher():
         plt.savefig(f"../images/text_freq/text_freq_{'_'.join(title_sources)}_{'_'.join(title_queries)}.png")
         plt.show()
 
-        return None
+        return f"../images/text_freq/text_freq_{'_'.join(title_sources)}_{'_'.join(title_queries)}.png"
     
-    def graph_keyword_freq(self, 
+    def graph_keyword_freq(self,
                            queries: list=["ALL"], 
                            sources: list=["ALL"], 
                            type_mode: str="abstract", 
                            k: int=15, 
                            n_gram: int=1, 
-                           stop_words: set=helper.MASTER_STOP_WORDS) -> None:
+                           stop_words: set=helper.MASTER_STOP_WORDS) -> str:
         """
         Graphs the keyword frequency of the specified papers. 
 
@@ -374,13 +378,14 @@ class XForce_Grapher():
         stop_words -> set
             The set of stop_words to use in the CountVectorizer()
 
-        Returns -> None
-            Shows matplotlib graph of the text counts
+        Returns -> str
+            Shows matplotlib graph of the text counts, and returns the generated plot path
         
         Example
             grapher = XForce_Grapher()
             grapher.graph_text_count(queries=["radiation", "plasmonics"], source="arxiv", type_mode="abstract", k=15, n_grams=1)
         """
+
         # Input Error Handling
         for source in sources:
             if source not in self._sources:
@@ -430,7 +435,7 @@ class XForce_Grapher():
         plt.savefig(f"../images/keyword_freq/keyword_freq_{'_'.join(title_sources)}_{'_'.join(title_queries)}.png")
         plt.show()
 
-        return None
+        return f"../images/keyword_freq/keyword_freq_{'_'.join(title_sources)}_{'_'.join(title_queries)}.png"
     
 
 #----------------------------------------------------

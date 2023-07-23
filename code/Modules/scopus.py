@@ -29,7 +29,7 @@ HEADERS = {
 }
 
 # Function to parse data received from API
-def parse_data(data) -> List[Dict[str, str]]:
+def parse_data(data, query) -> List[Dict[str, str]]:
 
     parsed = []
 
@@ -38,7 +38,7 @@ def parse_data(data) -> List[Dict[str, str]]:
 
         # Extract necessary field from each entry
         title = field.get('dc:title', 'N/A')
-        journal = field.get('prism:aggregationType', 'N/A')
+        journal = field.get('prism:publicationName', 'N/A')
         doi = field.get('prism:doi', 'N/A')
         authors = field.get('dc:creator', 'N/A') # for author in field.get('author', [])]
         published = field.get('prism:coverDate', 'N/A')
@@ -53,7 +53,7 @@ def parse_data(data) -> List[Dict[str, str]]:
         if pii != "N/A" or abstract != "N/A":
             parsed.append({
                 'source': 'scopus',
-                'query': 'metamaterials', # helper.DEFAULT_SEARCH_QUERY
+                'query': query, # helper.DEFAULT_SEARCH_QUERY
                 'query_time': datetime.now(),
                 'title': title,
                 'journal': journal,
@@ -93,7 +93,7 @@ def pull_requests(queries, start, max_result) -> None:
                 if response.status_code == 200:
                     query_time = datetime.now()
                     data = response.json()
-                    entries = parse_data(data)
+                    entries = parse_data(data, query)
 
                     for entry in entries:
                         writer.writerow(entry)
