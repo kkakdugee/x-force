@@ -1,13 +1,6 @@
 #----------------------------------e------------------
 # General DB Functions
 #----------------------------------------------------
-import pandas as pd
-import numpy as np
-import requests
-import feedparser
-import time
-from datetime import datetime
-from sklearn.feature_extraction.text import CountVectorizer, ENGLISH_STOP_WORDS
 import sys
 sys.path.append("./Modules/")
 import helper
@@ -411,6 +404,8 @@ def sub_main(current_session: eda_graphing.XForce_Grapher) -> None:
 def main() -> None:
     print("Welcome to Team NLP Research and Data Viz's Data Project!")
     print("\n", end="")
+    # plt.style.use("./Modules/style_sheets/test.mplstyle")
+    # plt.style.use('default')
     menu_object = menu_creator()
     while True:
         while True:

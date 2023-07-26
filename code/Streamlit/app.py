@@ -5,12 +5,10 @@ import numpy as np
 import sys 
 import time
 
-sys.path.append("../code/Modules")
+sys.path.append("../code/Modules/")
 import arxiv
 import scopus
 import helper
-
-
 
 def main():
 

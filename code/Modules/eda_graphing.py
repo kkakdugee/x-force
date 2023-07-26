@@ -7,6 +7,8 @@ import matplotlib.pyplot as plt
 import requests
 import feedparser
 import time
+import re
+import string
 from datetime import datetime
 import sys
 import helper
@@ -132,7 +134,7 @@ class XForce_Grapher():
         dates = [datetime(int(i.split("-")[0]), int(i.split("-")[1]), int(i.split("-")[2])) for i in dates_extract]
         
         # Graph
-        plt.title(f"Source: {title_sources}, Query: {title_queries}")
+        plt.title(f"Source: {title_sources}, Query: {title_queries}", fontsize=3)
         plt.suptitle(f"Publish Frequency within {len(dates)} Most Recent Papers")
         plt.xlabel("Publish Dates")
         plt.ylabel("Frequency")
@@ -158,8 +160,8 @@ class XForce_Grapher():
             grapher.load_db_summary()
         """
         df = self._data.copy()
-        sources = self._sources
-        queries = self._queries
+        sources = self._sources.copy()
+        queries = self._queries.copy()
         l = [["source"], queries]
         data_header = [item for sublist in l for item in sublist]
         data_rows = []
@@ -232,7 +234,7 @@ class XForce_Grapher():
     
     def load_nlp_summary(self) -> None:
         """
-        Creates and saves the NLP summary report in class variable.
+        Creates, pre-processes, and saves the NLP summary report in class variable, which is ready for analytics.
 
         Returns -> None
             Saves the NLP summary report.
