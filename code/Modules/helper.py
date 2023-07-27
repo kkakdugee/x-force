@@ -9,6 +9,7 @@ import sys
 import requests
 import feedparser
 import time
+import os
 from sklearn.feature_extraction.text import ENGLISH_STOP_WORDS
 
 #----------------------------------------------------
@@ -154,25 +155,30 @@ def remove_dupes(verbose: int=1) -> None:
     
     return None
 
-def map_yes_no(input: str) -> int:
+def map_yes_no(input: str, index: int) -> int:
     """ 
-    Maps y/n -> 1/0. All other values are returned as is.
+    Maps y/n -> 1/0. All other valid values are returned as is.
 
     input -> str
         Given "y" or "n".
     
+    input -> index
+        Given the index of the passed input
+    
     Returns -> int
-        1 if "y", 0 elif "n", the original value otherwise.
+        1 if "y", 0 elif "n", the original value if valid, and None otherwise.
     
     Example
         map_yes_no("y")
     """
-    if input == "y":
+    if input.isdigit() and (index == 0 or index == 1):
+        return input
+    elif input == "y" and (index == 2 or index == 3):
         return 1
-    elif input == "n":
+    elif input == "n" and (index == 2 or index == 3):
         return 0
     else:
-        return input
+        return None
     
 def generate_boolean_conditions(mode: str, conditions: list) -> str:
     """ 
@@ -203,6 +209,23 @@ def generate_boolean_conditions(mode: str, conditions: list) -> str:
     
     # Return
     return expression
+
+def hex_to_rgb(hex_color: str) -> tuple:
+    """
+    Given a HEX color, convert it to RGB
+
+    hex_color -> str
+        The given hex code (#RRGGBB)
+
+    Returns -> tuple
+        Returns the RGB values in a tuple
+    
+    Example hex_to_rgb("#00F900")
+    """
+
+    hex_color = hex_color.lstrip('#')
+    return tuple(int(hex_color[i:i+2], 16)/255 for i in (0, 2, 4))
+
 
 #----------------------------------------------------
 # Module Checking
