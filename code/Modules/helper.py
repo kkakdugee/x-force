@@ -72,6 +72,24 @@ TEMP_STOP_WORDS.append("inf")
 MASTER_STOP_WORDS = TEMP_STOP_WORDS
 
 #----------------------------------------------------
+# Default EDA Graphing Settings
+#----------------------------------------------------
+# Fonts TNR vs Arial
+DEFAULT_TITLE_FONT = "test"
+
+# Font Sizes
+DEFAULT_TITLE_SIZE = 0
+
+# Colors colors of the plot symbols/bars
+DEFAULT_TITLE_COLOR = 0
+
+# Symbols
+DEFAULT_TITLE_SIZE = 0
+
+# Image Sizes 3.5x2.75 for paper, 7x3 for slide
+DEFAULT_IMAGE_SIZE = 0
+
+#----------------------------------------------------
 # General DB Functions
 #----------------------------------------------------
 def reset_papers_db() -> None:
@@ -130,7 +148,7 @@ def remove_dupes(verbose: int=1) -> None:
     
     if verbose == 1:
         post_len = len(database)
-        print(f"Removed {post_len - pre_len} duplicates ({pre_len} -> {post_len})!")
+        print(f"Removed {pre_len - post_len} duplicates ({pre_len} -> {post_len})!")
 
     database.to_csv("../data/complete_db.csv", index=False)
     print("De-duplicated version saved!")
