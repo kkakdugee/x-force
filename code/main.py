@@ -1,4 +1,10 @@
-#----------------------------------e------------------
+#----------------------------------------------------
+# NOTICE
+#----------------------------------------------------
+# This is an old prototype of a user-interface and now used as a debug/dev menu
+# Not maintained nor production ready
+
+#----------------------------------------------------
 # General DB Functions
 #----------------------------------------------------
 import sys
@@ -68,7 +74,8 @@ def option_arxiv_update(dummy_var=0) -> None:
         print("Default options indicated!")
         start, max_results, verbose, remove_dupes = 0, 25, 1, 1
     else:
-        start, max_results, verbose, remove_dupes = [int(helper.map_yes_no(i.strip())) for i in user_params.split(",")]
+        user_params_list = [i.strip() for i in user_params.split(",")]
+        start, max_results, verbose, remove_dupes = [int(helper.map_yes_no(user_params_list[i], i)) for i in range(len(user_params_list))]
     print("\n", end="")
 
     # Function

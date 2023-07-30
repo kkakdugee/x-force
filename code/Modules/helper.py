@@ -2,25 +2,40 @@
 # helper.py imports
 #----------------------------------------------------
 # API
-import requests
+import requests # HTTP requests
+from bs4 import BeautifulSoup
 import feedparser
 import time
 from datetime import datetime
+from dotenv import load_dotenv # Loading environment variables (API KEY)
+from typing import List, Dict 
+import csv # Creating and Manipulating CSV files
+import os # For accessing the env file
+import random
 
-# EDA
+# EDA/NLP
 import pandas as pd
 import numpy as np
+from numpy import ma
 import matplotlib.pyplot as plt
-
-# NLP
+import matplotlib.cm as cm
+import matplotlib.colors as mcolors
+from matplotlib.colors import Normalize
 import re
 import string
 from sklearn.feature_extraction.text import CountVectorizer
 from nltk.stem import WordNetLemmatizer
 from nltk.corpus import stopwords
+import nltk
 import networkx as nx
 from scipy import sparse
 from wordcloud import WordCloud
+from textblob import TextBlob
+from keybert import KeyBERT
+import circlify
+
+# APP
+import streamlit as st
 
 # Menu
 import sys
@@ -150,25 +165,30 @@ def remove_dupes(verbose: int=1) -> None:
     
     return None
 
-def map_yes_no(input: str) -> int:
+def map_yes_no(input: str, index: int) -> int:
     """ 
-    Maps y/n -> 1/0. All other values are returned as is.
+    Maps y/n -> 1/0. All other valid values are returned as is.
 
     input -> str
         Given "y" or "n".
     
+    input -> index
+        Given the index of the passed input
+    
     Returns -> int
-        1 if "y", 0 elif "n", the original value otherwise.
+        1 if "y", 0 elif "n", the original value if valid, and None otherwise.
     
     Example
         map_yes_no("y")
     """
-    if input == "y":
+    if input.isdigit() and (index == 0 or index == 1):
+        return input
+    elif input == "y" and (index == 2 or index == 3):
         return 1
-    elif input == "n":
+    elif input == "n" and (index == 2 or index == 3):
         return 0
     else:
-        return input
+        return None
     
 def generate_boolean_conditions(mode: str, conditions: list) -> str:
     """ 
@@ -199,6 +219,8 @@ def generate_boolean_conditions(mode: str, conditions: list) -> str:
     
     # Return
     return expression
+
+
 
 #----------------------------------------------------
 # Module Checking

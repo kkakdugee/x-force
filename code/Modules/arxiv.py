@@ -1,12 +1,17 @@
 #----------------------------------------------------
-# Imports Checking
+# TODO
+#----------------------------------------------------
+# At fetch for more arxiv files, add in NLP preprocessing step here.
+
+#----------------------------------------------------
+# Imports
 #----------------------------------------------------
 import helper
 
 #----------------------------------------------------
 # Query Functions
 #----------------------------------------------------
-def fetch_request(query: str=helper.DEFAULT_SEARCH_QUERY, start: int=0, max_results: int=25) -> feedparser.util.FeedParserDict:
+def fetch_request(query: str=helper.DEFAULT_SEARCH_QUERY, start: int=0, max_results: int=25) -> helper.feedparser.util.FeedParserDict:
     """
     Performs a fetch request using the arXiv API, returning the most recently published results first.
 
@@ -37,21 +42,21 @@ def fetch_request(query: str=helper.DEFAULT_SEARCH_QUERY, start: int=0, max_resu
             "start": start,
             "max_results": max_results
         }
-        response = requests.get(helper.DEFAULT_URL, params=params)
+        response = helper.requests.get(helper.DEFAULT_URL, params=params)
 
         # Sleep to prevent rate limit
         print(f"Sleeping {helper.MIN_WAIT_TIME}")
-        time.sleep(helper.MIN_WAIT_TIME)
+        helper.time.sleep(helper.MIN_WAIT_TIME)
 
         # Return
         if response.status_code == 200:
-            feed = feedparser.parse(response.content)
+            feed = helper.feedparser.parse(response.content)
             print(f"Fetched {len(feed.entries)} entries.")
             return feed
         else:
             raise ConnectionError(response.status_code)
 
-def parse_request(feed: feedparser.util.FeedParserDict, query: str, verbose: int=1) -> pd.core.frame.DataFrame:
+def parse_request(feed: helper.feedparser.util.FeedParserDict, query: str, verbose: int=1) -> helper.pd.core.frame.DataFrame:
     """
     Converts the given JSON feed file into a legible dataframe (useful for .csv storage).
 
@@ -78,7 +83,7 @@ def parse_request(feed: feedparser.util.FeedParserDict, query: str, verbose: int
     all_papers = []
     num_missing_keys = 0
     for paper in feed.entries:
-        paper_data = ["arxiv", query, datetime.now()]
+        paper_data = ["arxiv", query, helper.datetime.now()]
         for key in helper.ARXIV_KEYS:
             try:
                 if key == "summary":
@@ -90,16 +95,16 @@ def parse_request(feed: feedparser.util.FeedParserDict, query: str, verbose: int
                 else:
                     paper_data.append(paper[key])
             except:
-                paper_data.append(np.nan)
+                paper_data.append(helper.np.nan)
                 num_missing_keys += 1
         all_papers.append(paper_data)
     if verbose == 1:
         print(f"{num_missing_keys} missing keys.")
-    df = pd.DataFrame(data=all_papers, columns=helper.MASTER_CSV_COLUMNS)
+    df = helper.pd.DataFrame(data=all_papers, columns=helper.MASTER_CSV_COLUMNS)
     print("Parsed!")
     return df
 
-def helper_fetch_parse_request(query: str=helper.DEFAULT_SEARCH_QUERY, start: int=0, max_results: int=25, verbose: int=1) -> pd.core.frame.DataFrame:
+def helper_fetch_parse_request(query: str=helper.DEFAULT_SEARCH_QUERY, start: int=0, max_results: int=25, verbose: int=1) -> helper.pd.core.frame.DataFrame:
     """
     Helper function for the main fetch_parse_request() function.
 
@@ -123,7 +128,7 @@ def helper_fetch_parse_request(query: str=helper.DEFAULT_SEARCH_QUERY, start: in
     df = parse_request(feed, query=query, verbose=verbose)
     return df
 
-def helper_remove_dupes(df: pd.core.frame.DataFrame, verbose: int=1) -> pd.core.frame.DataFrame:
+def helper_remove_dupes(df: helper.pd.core.frame.DataFrame, verbose: int=1) -> helper.pd.core.frame.DataFrame:
     """
     Removes the duplicate entries (checked via URL base) from a given dataframe containing recently fetched queries.
 
@@ -149,7 +154,7 @@ def helper_remove_dupes(df: pd.core.frame.DataFrame, verbose: int=1) -> pd.core.
         pre_len = len(df)
 
     # Removing dupes
-    database = pd.read_csv("../data/complete_db.csv")
+    database = helper.pd.read_csv("../data/complete_db.csv")
     database = database[database["source"] == "arxiv"]
     checks = database["url"].values.tolist()
     for check in checks:
@@ -243,14 +248,14 @@ def merge_request(list_of_dfs: list, verbose: int=1) -> None:
         return None
 
     if verbose == 1:
-            database = pd.read_csv("../data/complete_db.csv")
+            database = helper.pd.read_csv("../data/complete_db.csv")
             super_pre_len = len(database)
 
     for index, df in enumerate(list_of_dfs):
         print(f"Merging {index+1}/{len(list_of_dfs)}...")
         # Save df
         if verbose == 1:
-            database = pd.read_csv("../data/complete_db.csv")
+            database = helper.pd.read_csv("../data/complete_db.csv")
             pre_len = len(database)
             print(f"Attempting to add {len(df)} entries...")
 
@@ -261,12 +266,12 @@ def merge_request(list_of_dfs: list, verbose: int=1) -> None:
             print("Failed to save.")
 
         if verbose == 1:
-            database = pd.read_csv("../data/complete_db.csv")
+            database = helper.pd.read_csv("../data/complete_db.csv")
             post_len = len(database)
             print(f"Added {post_len - pre_len} entries ({pre_len} -> {post_len})!")
     
     if verbose == 1:
-        database = pd.read_csv("../data/complete_db.csv")
+        database = helper.pd.read_csv("../data/complete_db.csv")
         super_post_len = len(database)
         print(f"In summary, added {super_post_len - super_pre_len} entries ({super_pre_len} -> {super_post_len})!")
 
