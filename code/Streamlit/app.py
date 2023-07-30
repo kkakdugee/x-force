@@ -1,34 +1,38 @@
-import streamlit as st
-import pandas as pd
-import matplotlib.pyplot as plt
-import numpy as np
-import sys 
-import time
-import os
+#----------------------------------------------------
+# TODO
+#----------------------------------------------------
+# ?
 
+#----------------------------------------------------
+# Imports Checking
+#----------------------------------------------------
+import sys
 sys.path.append("../code/Modules")
 import arxiv
 import scopus
 import helper
 import eda_graphing
 
+#----------------------------------------------------
+# Graphing Class
+#----------------------------------------------------
 def display_database(col1, key):
 
-    df = pd.read_csv('../data/complete_db.csv')
+    df = helper.pd.read_csv('../data/complete_db.csv')
 
     max_rows = df.shape[0]
 
-    rows_to_display = st.sidebar.slider("Select the number of rows to display", 1, max_rows, value= (max_rows // 2), key=key)
+    rows_to_display = helper.st.sidebar.slider("Select the number of rows to display", 1, max_rows, value= (max_rows // 2), key=key)
     
     with col1:
-        st.dataframe(df.head(rows_to_display), height=800)
+        helper.st.dataframe(df.head(rows_to_display), height=800)
 
 
 def update_database(col1, col2):
 
     display_database(col1, "db_slider")
 
-    update_option = st.selectbox(
+    update_option = helper.st.selectbox(
         'Update from:',
         ['arXiv', 'Scopus', 'ALL']
     )
@@ -42,7 +46,7 @@ def update_database(col1, col2):
 
     if col2.button("Submit"):
 
-        status = st.empty()
+        status = helper.st.empty()
 
         valid_additional_params = True
 
@@ -65,7 +69,7 @@ def update_database(col1, col2):
              
             status.write(f"Succesfully obtained {query_input} data from {update_option}!")
 
-            time.sleep(2.5)
+            helper.time.sleep(2.5)
             status.empty()
 
             display_database(col1, "db_slider")
@@ -78,29 +82,29 @@ def update_database(col1, col2):
 
             status.write("Invalid Additional Parameters. Please try again.")
 
-    st.write("")
-    st.write("")
+    helper.st.write("")
+    helper.st.write("")
 
     if col2.button("Remove Duplicates from Database"):
 
-        status = st.empty()
+        status = helper.st.empty()
 
         status.write("Removing duplicate entries from Database...")
         helper.remove_dupes()
         status.write("Succesfully removed duplicate entries from Database!")
                 
-        time.sleep(2.5)
+        helper.time.sleep(2.5)
         status.empty()
 
         display_database(col1, "db_slider")
 
     if col2.button("Wipe Database"):
 
-        status = st.empty()
+        status = helper.st.empty()
 
         status.write("Are you sure? This action cannot be undone.")
 
-        yes_or_no = st.columns([1,1])
+        yes_or_no = helper.st.columns([1,1])
 
         if yes_or_no[0].button("Yes"):
             status.write("Wiping Database...")
@@ -114,7 +118,7 @@ def update_database(col1, col2):
 
 def analyze_database(col1, col2):
 
-    analyze_option = st.selectbox(
+    analyze_option = helper.st.selectbox(
         'Select Visualization',
         ['Database Summary', 'Keyword Frequency', 'Publish Frequency', 'Text Frequency']
     )
@@ -125,7 +129,7 @@ def analyze_database(col1, col2):
 
     if analyze_option != "Database Summary":
 
-        db_option = st.selectbox(
+        db_option = helper.st.selectbox(
             'From:',
             ['arXiv', 'Scopus', 'ALL']
         )
@@ -135,7 +139,7 @@ def analyze_database(col1, col2):
 
     if analyze_option == "Database Summary":
         with col1:
-            st.image(grapher.graph_db_summary(), caption="Database Summary", use_column_width=True)
+            helper.st.image(grapher.graph_db_summary(), caption="Database Summary", use_column_width=True)
 
     elif analyze_option == "Keyword Frequency":
 
@@ -144,7 +148,7 @@ def analyze_database(col1, col2):
 
         if query_input != "":
             with col1:
-                st.image(grapher.graph_keyword_freq(queries=queries, sources=[db_option]), caption="Keyword Frequency", use_column_width=True)
+                helper.st.image(grapher.graph_keyword_freq(queries=queries, sources=[db_option]), caption="Keyword Frequency", use_column_width=True)
                 
     elif analyze_option == "Publish Frequency":
 
@@ -153,7 +157,7 @@ def analyze_database(col1, col2):
 
         if query_input != "":
             with col1: 
-                st.image(grapher.graph_pub_freq(queries=queries, sources=[db_option]), caption="Publish Frequency", use_column_width=True)
+                helper.st.image(grapher.graph_pub_freq(queries=queries, sources=[db_option]), caption="Publish Frequency", use_column_width=True)
 
     elif analyze_option == "Text Frequency":
 
@@ -162,36 +166,36 @@ def analyze_database(col1, col2):
 
         if query_input != "":
             with col1:
-                st.image(grapher.graph_text_freq(queries=queries, sources=[db_option]), caption="Text Frequency", use_column_width=True)
+                helper.st.image(grapher.graph_text_freq(queries=queries, sources=[db_option]), caption="Text Frequency", use_column_width=True)
 
 
 def load_matplotlib_style():
     # Ensure default session state values
-    if 'matplotlib_style' not in st.session_state:
-        st.session_state['matplotlib_style'] = {}
+    if 'matplotlib_style' not in helper.st.session_state:
+        helper.st.session_state['matplotlib_style'] = {}
 
     # Apply style to Matplotlib
-    plt.rcParams.update(st.session_state['matplotlib_style'])
+    helper.plt.rcParams.update(helper.st.session_state['matplotlib_style'])
 
 
 def graph_profiles(col1, col2):
 
     with col1:
-        st.header('Customize Your Graph')
+        helper.st.header('Customize Your Graph')
 
-        config_name = st.text_input("Name your configuration", value="custom")
+        config_name = helper.st.text_input("Name your configuration", value="custom")
 
-        st.subheader('Font')
-        font_type = st.selectbox('Select font type', options=['Arial', 'Times New Roman', 'Calibri'])
-        font_size = st.slider('Select font size', min_value=8, max_value=20, value=10)
+        helper.st.subheader('Font')
+        font_type = helper.st.selectbox('Select font type', options=['Arial', 'Times New Roman', 'Calibri'])
+        font_size = helper.st.slider('Select font size', min_value=8, max_value=20, value=10)
 
-        st.subheader('Bars')
-        bar_color = st.color_picker('Select bar color', '#00F900')
-        bar_width = st.slider('Select bar width', min_value=0.5, max_value=5.0, value=2.0, step=0.25)
+        helper.st.subheader('Bars')
+        bar_color = helper.st.color_picker('Select bar color', '#00F900')
+        bar_width = helper.st.slider('Select bar width', min_value=0.5, max_value=5.0, value=2.0, step=0.25)
 
-        st.subheader('Figure Size')
-        fig_width = st.slider('Select figure width', min_value=3.5, max_value=10.0, value=7.0, step=0.25)
-        fig_height = st.slider('Select figure height', min_value=2.75, max_value=10.0, value=3.0, step=0.25)
+        helper.st.subheader('Figure Size')
+        fig_width = helper.st.slider('Select figure width', min_value=3.5, max_value=10.0, value=7.0, step=0.25)
+        fig_height = helper.st.slider('Select figure height', min_value=2.75, max_value=10.0, value=3.0, step=0.25)
 
 
         bar_color_rgb = helper.hex_to_rgb(bar_color)
@@ -204,53 +208,53 @@ def graph_profiles(col1, col2):
             'figure.figsize': str(fig_width) + ', ' + str(fig_height),
         }
 
-        if st.button('Save Configuration'):
+        if helper.st.button('Save Configuration'):
             if config_name:
                 with open(f'../configurations/{config_name}.matplotlibrc', 'w') as f:
                     for key, value in config.items():
                         f.write(f'{key}:{value}\n')
 
                 # Save the style to session state
-                st.session_state['matplotlib_style'] = config
-                st.success('Configuration saved successfully!')
+                helper.st.session_state['matplotlib_style'] = config
+                helper.st.success('Configuration saved successfully!')
             else:
-                st.error('Please add a Configuration name.')
+                helper.st.error('Please add a Configuration name.')
 
     with col2:
 
-        st.header('Load Configuration')
-        config_file = st.file_uploader("Upload Configuration (.rc) File")
+        helper.st.header('Load Configuration')
+        config_file = helper.st.file_uploader("Upload Configuration (.rc) File")
         config_default = '../configurations/default.matplotlibrc'  # Default configuration
 
         # Initialize the session_state
-        if "config_file_path" not in st.session_state:
-            st.session_state.config_file_path = config_default
-            st.session_state.default_config_shown = False
+        if "config_file_path" not in helper.st.session_state:
+            helper.st.session_state.config_file_path = config_default
+            helper.st.session_state.default_config_shown = False
 
         if config_file is not None:
-            config_file_path = os.path.join('../configurations', config_file.name)
+            config_file_path = helper.os.path.join('../configurations', config_file.name)
             with open(config_file_path, 'wb') as f:
                 f.write(config_file.getbuffer())
-            st.session_state.config_file_path = config_file_path
+            helper.st.session_state.config_file_path = config_file_path
 
-        if st.session_state.config_file_path == config_default and not st.session_state.default_config_shown:
-            st.session_state.default_config_shown = True
-        elif st.session_state.config_file_path != config_default:
-            st.session_state.default_config_shown = False
+        if helper.st.session_state.config_file_path == config_default and not helper.st.session_state.default_config_shown:
+            helper.st.session_state.default_config_shown = True
+        elif helper.st.session_state.config_file_path != config_default:
+            helper.st.session_state.default_config_shown = False
 
-        if st.session_state.default_config_shown:
-            st.info(f'Currently using default configuration')
+        if helper.st.session_state.default_config_shown:
+            helper.st.info(f'Currently using default configuration')
         else:
-            st.info(f'Currently using configuration from file: {st.session_state.config_file_path}')
+            helper.st.info(f'Currently using configuration from file: {helper.st.session_state.config_file_path}')
 
         try:
-            plt.style.use(st.session_state.config_file_path)
-            st.success('Configuration loaded successfully!')
+            helper.plt.style.use(helper.st.session_state.config_file_path)
+            helper.st.success('Configuration loaded successfully!')
         except IOError:
-            st.error(f'Could not find the style file {st.session_state.config_file_path} in the configurations directory.')
+            helper.st.error(f'Could not find the style file {helper.st.session_state.config_file_path} in the configurations directory.')
 
         # Display the configurations
-        with open(st.session_state.config_file_path, 'r') as f:
+        with open(helper.st.session_state.config_file_path, 'r') as f:
             config_content = f.read()
 
         file_details = {}
@@ -258,21 +262,21 @@ def graph_profiles(col1, col2):
             if line and ':' in line:
                 key, value = line.split(':')
                 file_details[key] = value
-        st.write(file_details)
+        helper.st.write(file_details)
 
 def feedback_help(col1):
 
     with col1.form(key="my_feedback"):
 
-        st.write("Please fill out this form")
-        name = st.text_input(label="Name:")
-        email = st.text_input(label="Email:")
-        issue_type = st.selectbox("Select Type:", options=["Help", "Feedback"])
-        feedback = st.text_area(label="Describe your suggestion/needed assistance:")
-        submit = st.form_submit_button(label="Submit")
+        helper.st.write("Please fill out this form")
+        name = helper.st.text_input(label="Name:")
+        email = helper.st.text_input(label="Email:")
+        issue_type = helper.st.selectbox("Select Type:", options=["Help", "Feedback"])
+        feedback = helper.st.text_area(label="Describe your suggestion/needed assistance:")
+        submit = helper.st.form_submit_button(label="Submit")
 
         if submit:
-            st.write(f"Thank you, {name}! We will get back to you shortly.")
+            helper.st.write(f"Thank you, {name}! We will get back to you shortly.")
                     # handle feed back here
 
 
@@ -280,31 +284,31 @@ def feedback_help(col1):
 def main():
 
     # Title of the web app
-    st.title('Team NLP Research & Data Viz')
+    helper.st.title('Team NLP Research & Data Viz')
 
     # Create a sidebar with a selection box
-    with st.sidebar:
+    with helper.st.sidebar:
 
-        option = st.selectbox(
+        option = helper.st.selectbox(
                 'Select from below:', 
                 ['Update Database', 'Analyze Database', 'Graph Configurations', 'Feedback / Help'])
 
         if option == 'Update Database':
-            st.write('This option will enable you to update the Database.')
+            helper.st.write('This option will enable you to update the Database.')
 
         elif option == 'Analyze Database':
             load_matplotlib_style()
-            st.write('This option will enable you to view visualizations of the Database.')
+            helper.st.write('This option will enable you to view visualizations of the Database.')
 
         elif option == 'Graph Configurations':
             load_matplotlib_style()
-            st.write('This option will enable you to configure your graphs.')
+            helper.st.write('This option will enable you to configure your graphs.')
 
         elif option == 'Feedback / Help':
-            st.write('Suggestions or Bugs.')
+            helper.st.write('Suggestions or Bugs.')
 
     # Create multiple columns in main panel
-    col1, col2 = st.columns([3,1]) 
+    col1, col2 = helper.st.columns([3,1]) 
 
 
      # Create buttons in the right column based on the sidebar selection
@@ -329,5 +333,5 @@ def main():
 
 
 if __name__ == "__main__":
-    st.set_page_config(page_title="NDV", layout="wide")
+    helper.st.set_page_config(page_title="NDV", layout="wide")
     main()

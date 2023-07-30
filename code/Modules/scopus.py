@@ -1,24 +1,21 @@
-from dotenv import load_dotenv # Loading environment variables (API KEY)
-from typing import List, Dict 
-from datetime import datetime
+#----------------------------------------------------
+# TODO
+#----------------------------------------------------
+# At fetch for more scopus files, add in NLP preprocessing step here.
 
-import requests # HTTP requests
-import csv # Creating and Manipulating CSV files
-import os # For accessing the env file
-import time # Wait time
-import random 
-import sys
-
-# Helper modules
-sys.path.append("../code/Modules/")
+#----------------------------------------------------
+# Imports
+#----------------------------------------------------
 import helper
 import scopus_scraper
 
-
-load_dotenv() # load environment variables
+#----------------------------------------------------
+# Script
+#----------------------------------------------------
+helper.load_dotenv() # load environment variables
 
 # API key from environment variable
-API_KEY = os.getenv('SCOPUS_API_KEY')
+API_KEY = helper.os.getenv('SCOPUS_API_KEY')
 # Scopus API url
 SCOPUS_URL = 'https://api.elsevier.com/content/search/scopus'
 
@@ -29,7 +26,7 @@ HEADERS = {
 }
 
 # Function to parse data received from API
-def parse_data(data, query) -> List[Dict[str, str]]:
+def parse_data(data, query) -> helper.List[helper.Dict[str, str]]:
 
     parsed = []
 
@@ -54,7 +51,7 @@ def parse_data(data, query) -> List[Dict[str, str]]:
             parsed.append({
                 'source': 'scopus',
                 'query': query, # helper.DEFAULT_SEARCH_QUERY
-                'query_time': datetime.now(),
+                'query_time': helper.datetime.now(),
                 'title': title,
                 'journal': journal,
                 'doi': doi,
@@ -76,7 +73,7 @@ def pull_requests(queries, start, max_result) -> None:
     data_path = '../data/complete_db.csv'
 
     with open(data_path, 'a', newline='', encoding='utf-8') as file:
-        writer = csv.DictWriter(file, fieldnames=helper.MASTER_CSV_COLUMNS)
+        writer = helper.csv.DictWriter(file, fieldnames=helper.MASTER_CSV_COLUMNS)
 
         for query in queries:
 
@@ -89,9 +86,9 @@ def pull_requests(queries, start, max_result) -> None:
             }
 
             while parameters['start'] < max_result:
-                response = requests.get(SCOPUS_URL, headers=HEADERS, params=parameters)
+                response = helper.requests.get(SCOPUS_URL, headers=HEADERS, params=parameters)
                 if response.status_code == 200:
-                    query_time = datetime.now()
+                    query_time = helper.datetime.now()
                     data = response.json()
                     entries = parse_data(data, query)
 
@@ -99,7 +96,7 @@ def pull_requests(queries, start, max_result) -> None:
                         writer.writerow(entry)
 
                     parameters['start'] += 25
-                    time.sleep(random.uniform(1, 2))
+                    helper.time.sleep(helper.random.uniform(1, 2))
                 else:
                     print("Failed:", response.status_code)
                     break

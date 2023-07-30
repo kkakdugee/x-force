@@ -1,13 +1,12 @@
-#----------------------------------e------------------
+#----------------------------------------------------
+# NOTICE
+#----------------------------------------------------
+# This is an old prototype of a user-interface and now used as a debug/dev menu
+# Not maintained nor production ready
+
+#----------------------------------------------------
 # General DB Functions
 #----------------------------------------------------
-import pandas as pd
-import numpy as np
-import requests
-import feedparser
-import time
-from datetime import datetime
-from sklearn.feature_extraction.text import CountVectorizer, ENGLISH_STOP_WORDS
 import sys
 sys.path.append("./Modules/")
 import helper

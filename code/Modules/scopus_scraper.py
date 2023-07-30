@@ -1,6 +1,16 @@
-from bs4 import BeautifulSoup
-import requests
+#----------------------------------------------------
+# TODO
+#----------------------------------------------------
+# At fetch for more arxiv files, add in NLP preprocessing step here.
 
+#----------------------------------------------------
+# Imports
+#----------------------------------------------------
+import helper
+
+#----------------------------------------------------
+# Script
+#----------------------------------------------------
 def get_abstract(url) -> str:
 
     # Set headers to mimic a browser
@@ -8,8 +18,8 @@ def get_abstract(url) -> str:
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36"
     }
     
-    response = requests.get(url, headers=headers)
-    soup = BeautifulSoup(response.text, 'html.parser')
+    response = helper.requests.get(url, headers=headers)
+    soup = helper.BeautifulSoup(response.text, 'html.parser')
     
     target_div = soup.find('div', class_="abstract author") # div where the abstract is located
     if target_div is not None:
