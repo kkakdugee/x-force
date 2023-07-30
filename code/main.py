@@ -281,6 +281,18 @@ def option_clean_dupes(dummy_var=0) -> None:
     print("Completed!", end="\n\n")
     return None
 
+def option_graph_bubble_map(current_session: eda_graphing.XForce_Grapher) -> None:
+    """ 
+    Documentation pending
+    """
+    # Function Call
+    current_session.graph_bubble_map()
+    
+    # Return
+    print("Completed!")
+    print("\n", end="")
+    return None
+
 def menu_creator() -> dict:
     """ 
     Auto generate the user menu, which takes on the form of a dictionary. Changes to the user menu should be made in this function.
@@ -297,7 +309,8 @@ def menu_creator() -> dict:
         ["[Analyze] See database paper distribution", option_graph_db_summary],
         ["[Analyze] See publication frequency by query", option_graph_pub_freq],
         ["[Analyze] See keyword frequency by query", option_graph_keyword_freq],
-        ["[Analyze] See text frequency by query", option_graph_text_freq],
+        ["[Analyze] See text frequency by query", option_graph_bubble_map],
+        ["[Analyze] See bubble map by query", option_graph_text_freq],
         ["[Update] Remove paper dupes from database", option_clean_dupes]
     ]
     hard_options = {
