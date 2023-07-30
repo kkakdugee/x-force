@@ -1,16 +1,44 @@
 #----------------------------------------------------
 # helper.py imports
 #----------------------------------------------------
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-from datetime import datetime
-import sys
-import requests
+# API
+import requests # HTTP requests
+from bs4 import BeautifulSoup
 import feedparser
 import time
-import os
-from sklearn.feature_extraction.text import ENGLISH_STOP_WORDS
+from datetime import datetime
+from dotenv import load_dotenv # Loading environment variables (API KEY)
+from typing import List, Dict 
+import csv # Creating and Manipulating CSV files
+import os # For accessing the env file
+import random
+
+# EDA/NLP
+import pandas as pd
+import numpy as np
+from numpy import ma
+import matplotlib.pyplot as plt
+import matplotlib.cm as cm
+import matplotlib.colors as mcolors
+from matplotlib.colors import Normalize
+import re
+import string
+from sklearn.feature_extraction.text import CountVectorizer
+from nltk.stem import WordNetLemmatizer
+from nltk.corpus import stopwords
+import nltk
+import networkx as nx
+from scipy import sparse
+from wordcloud import WordCloud
+from textblob import TextBlob
+from keybert import KeyBERT
+import circlify
+
+# APP
+import streamlit as st
+
+# Menu
+import sys
 
 #----------------------------------------------------
 # arXiv API Defaults
@@ -67,27 +95,9 @@ META_CSV_COLUMNS = ["query",
                     "date_of_last_index_extraction"
                     ]
 
-TEMP_STOP_WORDS = list(ENGLISH_STOP_WORDS)
+TEMP_STOP_WORDS = stopwords.words('english')
 TEMP_STOP_WORDS.append("inf")
 MASTER_STOP_WORDS = TEMP_STOP_WORDS
-
-#----------------------------------------------------
-# Default EDA Graphing Settings
-#----------------------------------------------------
-# Fonts TNR vs Arial
-DEFAULT_TITLE_FONT = "test"
-
-# Font Sizes
-DEFAULT_TITLE_SIZE = 0
-
-# Colors colors of the plot symbols/bars
-DEFAULT_TITLE_COLOR = 0
-
-# Symbols
-DEFAULT_TITLE_SIZE = 0
-
-# Image Sizes 3.5x2.75 for paper, 7x3 for slide
-DEFAULT_IMAGE_SIZE = 0
 
 #----------------------------------------------------
 # General DB Functions

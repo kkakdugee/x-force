@@ -1,18 +1,44 @@
 #----------------------------------------------------
+# TODO
+#----------------------------------------------------
+# IMPORT eda graphign ipynb and add the todos here
+
+#----------------------------------------------------
 # Imports Checking
 #----------------------------------------------------
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-import requests
-import feedparser
-import time
-from datetime import datetime
-import sys
-import streamlit as st
 import helper
-from sklearn.feature_extraction.text import CountVectorizer, ENGLISH_STOP_WORDS
 
+#----------------------------------------------------
+# Global Variable
+#----------------------------------------------------
+is_demo = True
+
+#----------------------------------------------------
+# Helper Class
+#----------------------------------------------------
+class TextNorm(helper.Normalize):
+    """
+    # TODO: finish documention
+    Map a list of text values to the float range 0-1
+    """
+
+    def __init__(self, textvals, clip=False):
+        self._clip = clip
+        # if you want, clean text here, for duplicate, sorting, etc
+        ltextvals = set(textvals)
+        self.N = len(ltextvals)
+        self.textmap = dict(
+            [(text, float(i)/(self.N-1)) for i, text in enumerate(ltextvals)])
+        self._vmin = 0
+        self._vmax = 1
+
+    def __call__(self, x, clip=None):
+        ret = helper.ma.asarray([self.textmap.get(xkey, -1) for xkey in x])
+        return ret
+
+    def inverse(self, value):
+        return ValueError("TextNorm is not invertible")
+    
 #----------------------------------------------------
 # Graphing Class
 #----------------------------------------------------
@@ -24,7 +50,10 @@ class XForce_Grapher():
         self._summary = None
         self._nlp_summary = None
         self._data_size = None
-        self.load("../data/complete_db.csv")
+        if is_demo:
+            self.load("../data/demo_db.csv")
+        else:
+            self.load("../data/complete_db.csv")
         return None
 
     def load(self, path: str) -> None:
@@ -134,7 +163,7 @@ class XForce_Grapher():
         dates = [datetime(int(i.split("-")[0]), int(i.split("-")[1]), int(i.split("-")[2])) for i in dates_extract]
         
         # Graph
-        plt.title(f"Source: {title_sources}, Query: {title_queries}")
+        plt.title(f"Source: {title_sources}, Query: {title_queries}", fontsize=3)
         plt.suptitle(f"Publish Frequency within {len(dates)} Most Recent Papers")
         plt.xlabel("Publish Dates")
         plt.ylabel("Frequency")
@@ -160,8 +189,8 @@ class XForce_Grapher():
             grapher.load_db_summary()
         """
         df = self._data.copy()
-        sources = self._sources
-        queries = self._queries
+        sources = self._sources.copy()
+        queries = self._queries.copy()
         l = [["source"], queries]
         data_header = [item for sublist in l for item in sublist]
         data_rows = []
@@ -235,7 +264,7 @@ class XForce_Grapher():
     
     def load_nlp_summary(self) -> None:
         """
-        Creates and saves the NLP summary report in class variable.
+        Creates, pre-processes, and saves the NLP summary report in class variable, which is ready for analytics.
 
         Returns -> None
             Saves the NLP summary report.
