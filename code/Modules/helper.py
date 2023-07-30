@@ -210,21 +210,6 @@ def generate_boolean_conditions(mode: str, conditions: list) -> str:
     # Return
     return expression
 
-def hex_to_rgb(hex_color: str) -> tuple:
-    """
-    Given a HEX color, convert it to RGB
-
-    hex_color -> str
-        The given hex code (#RRGGBB)
-
-    Returns -> tuple
-        Returns the RGB values in a tuple
-    
-    Example hex_to_rgb("#00F900")
-    """
-
-    hex_color = hex_color.lstrip('#')
-    return tuple(int(hex_color[i:i+2], 16)/255 for i in (0, 2, 4))
 
 
 #----------------------------------------------------

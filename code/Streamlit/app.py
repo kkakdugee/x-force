@@ -185,22 +185,14 @@ def graph_profiles(col1, col2):
         font_type = st.selectbox('Select font type', options=['Arial', 'Times New Roman', 'Calibri'])
         font_size = st.slider('Select font size', min_value=8, max_value=20, value=10)
 
-        st.subheader('Bars')
-        bar_color = st.color_picker('Select bar color', '#00F900')
-        bar_width = st.slider('Select bar width', min_value=0.5, max_value=5.0, value=2.0, step=0.25)
-
         st.subheader('Figure Size')
         fig_width = st.slider('Select figure width', min_value=3.5, max_value=10.0, value=7.0, step=0.25)
         fig_height = st.slider('Select figure height', min_value=2.75, max_value=10.0, value=3.0, step=0.25)
 
 
-        bar_color_rgb = helper.hex_to_rgb(bar_color)
-
         config = {
             'font.family': font_type,
             'font.size': font_size,
-            'lines.color': bar_color_rgb,
-            'lines.linewidth': bar_width,
             'figure.figsize': str(fig_width) + ', ' + str(fig_height),
         }
 
@@ -273,14 +265,26 @@ def feedback_help(col1):
 
         if submit:
             st.write(f"Thank you, {name}! We will get back to you shortly.")
-                    # handle feed back here
 
+            token = 'github token'
+
+            url = 'https://api.github.com/repos/kkakdugee/x-force/issues'  
+            headers = {
+                'Authorization': f'token {token}',
+                'Accept': 'application/vnd.github+json',  
+            }
+            data = {
+                'title': f'Feedback from {name}',
+                'body': feedback,
+            }
+
+            response = requests.post(url, headers=headers, json=data)
 
 
 def main():
 
     # Title of the web app
-    st.title('Team NLP Research & Data Viz')
+    st.title('X-Force NLP Visualizer')
 
     # Create a sidebar with a selection box
     with st.sidebar:
