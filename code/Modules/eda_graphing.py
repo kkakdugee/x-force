@@ -53,6 +53,7 @@ class XForce_Grapher():
         self._sparse_matrix = None
         self._sparse_matrix_names = None
         if is_demo:
+            print("Dynamic load disabled in demo mode due to 11hr+ runtime. All functions are ran on database snapshot.")
             self.load("../data/demo_db.csv")
         else:
             self.load("../data/complete_db.csv")
@@ -61,6 +62,7 @@ class XForce_Grapher():
     def load(self, path: str) -> None:
         self.load_db(path)
         self.load_db_summary()
+        self.load_nlp_summary()
         return None
 
     def load_db(self, path: str) -> None:
@@ -110,6 +112,50 @@ class XForce_Grapher():
         self._summary = report
         return None
 
+    def load_nlp_summary(self) -> None:
+        """
+        Creates, pre-processes, and saves the NLP summary report in class variable, which is ready for analytics.
+
+        Returns -> None
+            Saves the NLP summary report.
+        
+        Example
+            grapher = XForce_Grapher()
+            grapher.load_nlp_summary()
+        """
+        # Demo check
+        if is_demo:
+            self._nlp_summary = helper.pd.read_csv("../data/demo_db.csv")
+        else:
+            # Filtering
+            df = self._data.copy()
+            df = df[["source", "query", "published", "url", "title", "abstract"]]
+            
+            # Cleaning & Feature Creation
+            df.dropna(inplace=True)
+            col_to_process = ["title", "abstract"]
+            for col in col_to_process:
+                df[f"{col}_char_count"] = df.loc[:, f"{col}"].map(lambda x: len(x))
+                df[f"{col}_word_count"] = df.loc[:, f"{col}"].map(lambda x: len(x.split(" ")))
+                print(f"Finished {col} counter; moving to rules-preprocessing.")
+                df.loc[:, col] = df.loc[:, col].apply(lambda x: x.lower())
+                df.loc[:, col] = df.loc[:, col].apply(lambda x: self.helper_remove_stopwords(x))
+                df.loc[:, col] = df.loc[:, col].apply(lambda x: helper.re.sub('[%s]' % helper.re.escape(helper.string.punctuation), ' ' , x))
+                df.loc[:, col] = df.loc[:, col].apply(lambda x: helper.re.sub(r'\d+', '', x))
+                df.loc[:, col] = df.loc[:, col].apply(lambda x: helper.re.sub(' +', ' ', x))
+                df.loc[:, col] = df.loc[:, col].apply(lambda x: self.helper_lemmatizer(x))
+                print(f"Finished {col} rules-preprocessing; moving to singularization-preprocessing.")
+                df.loc[:, col] = df.loc[:, col].apply(lambda x: self.helper_singularizer(x))
+                print(f"Finished {col} singularization-preprocessing; moving to embedded-preprocessing.")
+                df[f"{col}_keywords"] = df.loc[:, f"{col}"].map(lambda x: self.helper_keyword_extractor(x))
+                print(f"Finished {col} embedded-preprocessing.")
+
+            # Saving
+            self._nlp_summary = df
+        
+        # Return
+        return None
+
     def peek_data(self):
         return self._data.head()
     
@@ -141,6 +187,59 @@ class XForce_Grapher():
 
     def set_data(self, path: str) -> None:
         self.load(path)
+        return None
+
+    def report_db_summary(self) -> None:
+        """ 
+        Prints a report table of the count of paper entries by query and by source.
+
+        Returns -> None
+            Both prints and returns the report dataframe.
+
+        Example
+            grapher = XForce_Grapher()
+            grapher.report_db_summary()
+        """
+        print(self._summary)
+        return None
+
+    def graph_db_summary(self) -> None:
+        """
+        Graphs the report summary as a stacked barchart.
+
+        Returns -> None
+            Prints out matplotlib graph of the report summary
+        
+        Example
+            grapher = XForce_Grapher()
+            grapher.graph_db_summary()
+        """
+        df = self._summary.copy()
+        extract_counts = df.T.values.tolist()[1:-1] # -1 to remove the "ALL" from the category
+        extract_queries = df.T.index.tolist()[1:-1]
+        sources = df["source"]
+
+        query_count_data = {}
+        for i in range(len(extract_counts)):
+            query_count_data[extract_queries[i]] = extract_counts[i]
+        
+        width = 0.5
+        fig, ax = helper.plt.subplots()
+        bottom = helper.np.zeros(3)
+
+        for query, count in query_count_data.items():
+            p = ax.bar(sources, count, width, label=query, bottom=bottom)
+            bottom += count
+
+        helper.plt.title(f"Distribution of {self._data_size} Articles")
+        helper.plt.xlabel("Source")
+        helper.plt.ylabel("Counts")
+        helper.plt.grid("True")
+        helper.plt.legend(loc='upper left', bbox_to_anchor=(1,1))
+        helper.plt.tight_layout()
+        helper.plt.savefig(f"../images/db_summ/db_summ.png")
+        helper.plt.show()
+
         return None
 
     def graph_pub_freq(self, 
@@ -218,142 +317,7 @@ class XForce_Grapher():
 
         # Return
         return None
-    
-    def report_db_summary(self) -> None:
-        """ 
-        Prints a report table of the count of paper entries by query and by source.
-
-        Returns -> None
-            Both prints and returns the report dataframe.
-
-        Example
-            grapher = XForce_Grapher()
-            grapher.report_db_summary()
-        """
-        print(self._summary)
-        return None
-
-    def graph_db_summary(self) -> None:
-        """
-        Graphs the report summary as a stacked barchart.
-
-        Returns -> None
-            Prints out matplotlib graph of the report summary
-        
-        Example
-            grapher = XForce_Grapher()
-            grapher.graph_db_summary()
-        """
-        df = self._summary.copy()
-        extract_counts = df.T.values.tolist()[1:-1] # -1 to remove the "ALL" from the category
-        extract_queries = df.T.index.tolist()[1:-1]
-        sources = df["source"]
-
-        query_count_data = {}
-        for i in range(len(extract_counts)):
-            query_count_data[extract_queries[i]] = extract_counts[i]
-        
-        width = 0.5
-        fig, ax = helper.plt.subplots()
-        bottom = helper.np.zeros(3)
-
-        for query, count in query_count_data.items():
-            p = ax.bar(sources, count, width, label=query, bottom=bottom)
-            bottom += count
-
-        helper.plt.title(f"Distribution of {self._data_size} Articles")
-        helper.plt.xlabel("Source")
-        helper.plt.ylabel("Counts")
-        helper.plt.grid("True")
-        helper.plt.legend(loc='upper left', bbox_to_anchor=(1,1))
-        helper.plt.tight_layout()
-        helper.plt.savefig(f"../images/db_summ/db_summ.png")
-        helper.plt.show()
-
-        return None
-    
-    def helper_remove_stopwords(self, input):
-        """
-        # TODO fill in docstring
-        """
-        words = input.split(" ")
-        filtered_words = [word for word in words if word not in helper.MASTER_STOP_WORDS]
-        output = " ".join(filtered_words)
-        return output
-    
-    def helper_lemmatizer(self, input):
-        """
-        # TODO fill in docstring
-        """
-        wordnet_lemmatizer = helper.WordNetLemmatizer()
-        words = input.split(" ")
-        lemma_words = [wordnet_lemmatizer.lemmatize(word) for word in words]
-        output = " ".join(lemma_words)
-        return output
-    
-    def helper_keyword_extractor(self, input):
-        """
-        # TODO fill in docstring
-        """
-        kw_model = helper.KeyBERT()
-        output = kw_model.extract_keywords(input, keyphrase_ngram_range=(1, 2), stop_words=helper.MASTER_STOP_WORDS)
-        return output
-
-    def helper_singularizer(self, input):
-        """
-        # TODO fill in docstring
-        """
-        blob = helper.TextBlob(input)
-        singular_nouns = [word.singularize() for word, tag in blob.tags if tag.startswith('NN')]
-        output = " ".join(singular_nouns)
-        return output
-
-    def load_nlp_summary(self) -> None:
-        """
-        Creates, pre-processes, and saves the NLP summary report in class variable, which is ready for analytics.
-
-        Returns -> None
-            Saves the NLP summary report.
-        
-        Example
-            grapher = XForce_Grapher()
-            grapher.load_nlp_summary()
-        """
-        # Demo check
-        if is_demo:
-            print("Dynamic load disabled in demo mode due to 11hr+ runtime. All functions are ran on database snapshot.")
-            self._nlp_summary = helper.pd.read_csv("../data/demo_db.csv")
-            return
-
-        # Filtering
-        df = self._data.copy()
-        df = df[["source", "query", "published", "url", "title", "abstract"]]
-        
-        # Cleaning & Feature Creation
-        df.dropna(inplace=True)
-        col_to_process = ["title", "abstract"]
-        for col in col_to_process:
-            df[f"{col}_char_count"] = df.loc[:, f"{col}"].map(lambda x: len(x))
-            df[f"{col}_word_count"] = df.loc[:, f"{col}"].map(lambda x: len(x.split(" ")))
-            print(f"Finished {col} counter; moving to rules-preprocessing.")
-            df.loc[:, col] = df.loc[:, col].apply(lambda x: x.lower())
-            df.loc[:, col] = df.loc[:, col].apply(lambda x: self.helper_remove_stopwords(x))
-            df.loc[:, col] = df.loc[:, col].apply(lambda x: helper.re.sub('[%s]' % helper.re.escape(helper.string.punctuation), ' ' , x))
-            df.loc[:, col] = df.loc[:, col].apply(lambda x: helper.re.sub(r'\d+', '', x))
-            df.loc[:, col] = df.loc[:, col].apply(lambda x: helper.re.sub(' +', ' ', x))
-            df.loc[:, col] = df.loc[:, col].apply(lambda x: self.helper_lemmatizer(x))
-            print(f"Finished {col} rules-preprocessing; moving to singularization-preprocessing.")
-            df.loc[:, col] = df.loc[:, col].apply(lambda x: self.helper_singularizer(x))
-            print(f"Finished {col} singularization-preprocessing; moving to embedded-preprocessing.")
-            df[f"{col}_keywords"] = df.loc[:, f"{col}"].map(lambda x: self.helper_keyword_extractor(x))
-            print(f"Finished {col} embedded-preprocessing.")
-            
-        # Saving
-        self._nlp_summary = df
-        
-        # Return
-        return None
-    
+ 
     def graph_text_freq(self, 
                          queries: list=["ALL"], 
                          sources: list=["ALL"], 
@@ -444,6 +408,64 @@ class XForce_Grapher():
 
         return None
 
+    def helper_remove_stopwords(self, input):
+        """
+        # TODO fill in docstring
+        """
+        words = input.split(" ")
+        filtered_words = [word for word in words if word not in helper.MASTER_STOP_WORDS]
+        output = " ".join(filtered_words)
+        return output
+    
+    def helper_lemmatizer(self, input):
+        """
+        # TODO fill in docstring
+        """
+        wordnet_lemmatizer = helper.WordNetLemmatizer()
+        words = input.split(" ")
+        lemma_words = [wordnet_lemmatizer.lemmatize(word) for word in words]
+        output = " ".join(lemma_words)
+        return output
+    
+    def helper_keyword_extractor(self, input):
+        """
+        # TODO fill in docstring
+        """
+        kw_model = helper.KeyBERT()
+        output = kw_model.extract_keywords(input, keyphrase_ngram_range=(1, 2), stop_words=helper.MASTER_STOP_WORDS)
+        return output
+
+    def helper_singularizer(self, input):
+        """
+        # TODO fill in docstring
+        """
+        blob = helper.TextBlob(input)
+        singular_nouns = [word.singularize() for word, tag in blob.tags if tag.startswith('NN')]
+        output = " ".join(singular_nouns)
+        return output
+
+    def helper_eval(self, input):
+        output = eval(input)
+        return output
+
+    def helper_extract_text(self, input):
+        input = eval(input)
+        output = [i[0] for i in input]
+        return output
+    
+    def helper_extract_value(self, input):
+        input = eval(input)
+        output = [i[1] for i in input]
+        return output
+    
+    def helper_extract_set(self, input):
+        output = set()
+        for i in input:
+            tokens = i.split(" ")
+            for token in tokens:
+                output.add(token)
+        return list(output)
+
     def graph_keyword_freq(self, 
                            queries: list=["ALL"], 
                            sources: list=["ALL"], 
@@ -451,6 +473,8 @@ class XForce_Grapher():
                            k: int=15, 
                            n_gram: int=2) -> None:
         """
+        # TODO Currently works with demo_db.csv 
+
         Graphs the keyword frequency of the specified papers. 
 
         queries -> list
@@ -511,7 +535,8 @@ class XForce_Grapher():
             title_queries = queries
         else:
             queries = self._queries[:-1]
-        keywords = df.loc[:, f"{type_mode}_keywords"]
+        df[f"{type_mode}_keywords"] = df[f"{type_mode}_keywords"].apply(lambda x: self.helper_eval(x))
+        keywords = df[f"{type_mode}_keywords"]
         keyword_freq = {}
         for list_of_keyword_tuples in keywords:
             for keyword_tuple in list_of_keyword_tuples:
@@ -548,22 +573,141 @@ class XForce_Grapher():
 
         # Saving
         helper.plt.tight_layout()
-        helper.plt.savefig(f"../../images/keyword_freq/keyword_freq_{'_'.join(title_sources)}_{'_'.join(title_queries)}.png")
+        helper.plt.savefig(f"../images/keyword_freq/keyword_freq_{'_'.join(title_sources)}_{'_'.join(title_queries)}.png")
         helper.plt.show()
 
         return None
 
-    def graph_network_cooccurence(self, n):
-        # TODO
+    def graph_network_cooccurence(self, n: int=50, annotation_threshold: float=0.05) -> None:
+        """
+        # TODO: currently only works with demo_db.csv loaded due to eval inconsistency
         # n = number of top keywords per query
-        return
+        # annotation_threshold = 0-1, any nodes of frequency count larger than threshold will be labeled
+        """
+        # -----------------------
+        # DATA SETUP GRAPHING
+        # -----------------------
+        # Error Handling
+        if self._nlp_summary is None:
+            print("Please run .load_nlp_summary() first, ETA ~1 minute.")
+            return
+
+        # Raw data extraction
+        corpus = self._nlp_summary[["abstract_keywords", "query"]]
+        corpus["keyword_labels"] = corpus.iloc[:, 0].apply(lambda x: self.helper_extract_text(x))
+        corpus["keyword_unique_labels"] = corpus.iloc[:, 2].apply(lambda x: self.helper_extract_set(x))
+        corpus["keyword_meaningfulness"] = corpus.iloc[:, 0].apply(lambda x: self.helper_extract_value(x))
+
+        # Edgelist data extraction
+        if is_demo:
+            df_edgelist = helper.pd.read_csv("../data/demo_edgelist.csv")
+            df_edgelist["0"] = df_edgelist["0"].apply(lambda x: self.helper_eval(x))
+            edgelist = list(zip(df_edgelist["0"].values, df_edgelist["1"].values))
+        else:
+            edgelist = []
+            unique_keys = set()
+            for set_item in corpus["keyword_unique_labels"]:
+                for i in set_item:
+                    unique_keys.add(i)
+            for unique_key in unique_keys:
+                for row_index in range(len(corpus["keyword_unique_labels"])):
+                    for term in corpus["keyword_unique_labels"][row_index]:
+                        if unique_key == term:
+                            for i in range(len(corpus["keyword_unique_labels"][row_index])):
+                                if corpus["keyword_unique_labels"][row_index][i] != unique_key:
+                                    ordered_edge = sorted((unique_key, corpus["keyword_unique_labels"][row_index][i]))
+                                    complete_edge = (ordered_edge, corpus["query"][row_index])
+                                    edgelist.append(complete_edge)
+        
+        # Individual edgelist data stream extraction
+        freq_dict = {}
+        for cooccurence in edgelist:
+            stringify = "-".join(cooccurence[0])
+            if stringify in freq_dict.keys():
+                freq_dict[stringify][0] += 1
+            else:
+                freq_dict[stringify] = [1, cooccurence[1]]
+        summ_freq_edges = sorted(freq_dict.items(), key=lambda x: x[1], reverse=True)
+
+        unique_queries = self._queries.copy()
+        filtered_entries = []
+        for unique_query in unique_queries:
+            counter = 0
+            for tuple_entry in summ_freq_edges:
+                if counter < n:
+                    if tuple_entry[1][1] == unique_query:
+                        filtered_entries.append(tuple_entry)
+                        counter += 1
+
+        nodify, counts, queries = [], [], []
+        for item in filtered_entries:
+            node1, node2 = item[0].split("-")
+            res_tuple = (node1, node2)
+            nodify.append(res_tuple)
+            counts.append(item[1][0])
+            queries.append(item[1][1])
+
+        # -----------------------
+        # NETWORK GRAPHING
+        # -----------------------
+        # Grapher setup
+        G = helper.nx.Graph()
+        G.add_edges_from(nodify)
+
+        # Calculate node sizes based on frequencies
+        node_sizes = {}
+        for node in G.nodes:
+            total_frequency = 0
+            for (u, v), frequency in zip(nodify, counts):
+                if node in (u, v):
+                    total_frequency += frequency
+            node_sizes[node] = total_frequency
+        label_threshold = max(node_sizes.values()) * annotation_threshold
+
+        # Constructing unique colors / category mappying
+        unique_queries = self._queries
+        color_map = helper.plt.cm.get_cmap('tab20', len(unique_queries))
+        node_to_category = dict(zip(G.nodes, queries))
+
+        # Figure setup
+        helper.plt.figure(figsize=(15, 15))
+        pos = helper.nx.kamada_kawai_layout(G)
+        helper.plt.axis('off')
+        helper.plt.title(f"Network Co-Occurrence of Top {n} Keyterms in Each of {len(unique_queries)-1} Queries")
+
+        # Plot nodes
+        node_size_list = [node_sizes[node] for node in G.nodes]
+        node_color_list = [color_map(unique_queries.index(node_to_category[node])) for node in G.nodes]
+        helper.nx.draw_networkx_nodes(G, pos, node_size=node_size_list, node_color=node_color_list, alpha=0.7)
+        helper.nx.draw_networkx_edges(G, pos, edge_color='gray', alpha=0.5)
+
+        # Annotate nodes
+        label_nodes = [node for node, size in node_sizes.items() if size > label_threshold]
+        labels = {node: node for node in label_nodes}
+        helper.nx.draw_networkx_labels(G, pos, labels, font_size=10, font_color='black')
+
+        # Legend
+        legend_entries = []
+        for category in unique_queries:
+            legend_entries.append(helper.plt.Line2D([0], [0], marker='o', color='w', markerfacecolor=color_map(unique_queries.index(category)), label=category))
+        helper.plt.legend(handles=legend_entries, title='Categories', title_fontsize=12)
+
+        # Display the plot
+        helper.plt.tight_layout()
+        helper.plt.savefig(f"../images/network_cooccur/network_cooccur_{n}.png")
+        helper.plt.show()
     
     def graph_bubble_map(self, n: int=5, annotate_threshold: float=0.15) -> None:
         """ 
-        # TODO
+        # TODO currently only works with demo_db.csv loaded due to eval inconsistency
         # n = number of top keywords per query
         # annotate_threshold = radius of individual circle, if radius is larger than given, then annotate
         """
+        # Error Handling
+        if self._nlp_summary is None:
+            print("Please run .load_nlp_summary() first, ETA ~1 minute.")
+            return
+
         # Data Cleaning
         corpus = self._nlp_summary[["abstract_keywords", "query"]]
 
@@ -618,7 +762,7 @@ class XForce_Grapher():
 
         # Setting up figures
         fig, ax = helper.plt.subplots(figsize=(10,10))
-        ax.set_title(f"Bubble Map of {n} Most Common Keyterms in Each of {len(unique_queries)} Queries")
+        ax.set_title(f"Bubble Map of {n} Most Common Keyterms in Each of {len(unique_queries)-1} Queries")
         ax.axis('off')
 
         # Calculate boundaries of graph
