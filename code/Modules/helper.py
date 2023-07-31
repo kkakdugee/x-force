@@ -40,6 +40,12 @@ import streamlit as st
 # Menu
 import sys
 
+# Misc
+import warnings
+from pandas.errors import SettingWithCopyWarning
+warnings.simplefilter(action="ignore", category=SettingWithCopyWarning)
+warnings.simplefilter(action='ignore', category=FutureWarning)
+
 #----------------------------------------------------
 # arXiv API Defaults
 #----------------------------------------------------

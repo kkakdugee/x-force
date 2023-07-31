@@ -293,6 +293,18 @@ def option_graph_bubble_map(current_session: eda_graphing.XForce_Grapher) -> Non
     print("\n", end="")
     return None
 
+def option_graph_network_cooccurence(current_session: eda_graphing.XForce_Grapher) -> None:
+    """ 
+    Documentation pending
+    """
+    # Function Call
+    current_session.graph_network_cooccurence()
+    
+    # Return
+    print("Completed!")
+    print("\n", end="")
+    return None
+
 def menu_creator() -> dict:
     """ 
     Auto generate the user menu, which takes on the form of a dictionary. Changes to the user menu should be made in this function.
@@ -305,12 +317,13 @@ def menu_creator() -> dict:
     """
     # Variables
     auto_options = [
-        ["[Update] Add more papers to database", option_arxiv_update],
-        ["[Analyze] See database paper distribution", option_graph_db_summary],
-        ["[Analyze] See publication frequency by query", option_graph_pub_freq],
-        ["[Analyze] See keyword frequency by query", option_graph_keyword_freq],
-        ["[Analyze] See text frequency by query", option_graph_bubble_map],
-        ["[Analyze] See bubble map by query", option_graph_text_freq],
+        ["[API] Add more papers to database", option_arxiv_update],
+        ["[EDA] See database paper distribution", option_graph_db_summary],
+        ["[EDA] See publication frequency by query", option_graph_pub_freq],
+        ["[EDA] See text frequency by query", option_graph_text_freq],
+        ["[NLP] See keyword frequency by query", option_graph_keyword_freq],
+        ["[NLP] See network co-occurence by query", option_graph_network_cooccurence],
+        ["[NLP] See bubble map by query", option_graph_bubble_map],
         ["[Update] Remove paper dupes from database", option_clean_dupes]
     ]
     hard_options = {
