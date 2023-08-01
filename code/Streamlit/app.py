@@ -3,22 +3,16 @@
 #----------------------------------------------------
 # ?
 
-<<<<<<< HEAD
-sys.path.append("../code/Modules/")
-=======
 #----------------------------------------------------
 # Imports Checking
 #----------------------------------------------------
 import sys
 sys.path.append("../code/Modules")
->>>>>>> 7d2915ff87cdc153f459327ec7d9b3ce7274f07c
 import arxiv
 import scopus
 import helper
 import eda_graphing
 
-<<<<<<< HEAD
-=======
 #----------------------------------------------------
 # Graphing Class
 #----------------------------------------------------
@@ -288,22 +282,9 @@ def feedback_help(col1):
                 'body': feedback,
             }
 
-            token = 'github token'
-
-            url = 'https://api.github.com/repos/kkakdugee/x-force/issues'  
-            headers = {
-                'Authorization': f'token {token}',
-                'Accept': 'application/vnd.github+json',  
-            }
-            data = {
-                'title': f'Feedback from {name}',
-                'body': feedback,
-            }
-
             response = helper.requests.post(url, headers=headers, json=data)
 
 
->>>>>>> 7d2915ff87cdc153f459327ec7d9b3ce7274f07c
 def main():
 
     # Title of the web app
