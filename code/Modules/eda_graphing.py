@@ -240,7 +240,7 @@ class XForce_Grapher():
         helper.plt.savefig(f"../images/db_summ/db_summ.png")
         helper.plt.show()
 
-        return None
+        return "../images/db_summ/db_summ.png"
 
     def graph_pub_freq(self, 
                        queries: list=["ALL"], 
@@ -316,7 +316,7 @@ class XForce_Grapher():
         helper.plt.show()
 
         # Return
-        return None
+        return f"../images/pub_freq/pub_freq_{'_'.join(title_sources)}_{'_'.join(title_queries)}.png"
  
     def graph_text_freq(self, 
                          queries: list=["ALL"], 
@@ -406,7 +406,7 @@ class XForce_Grapher():
         helper.plt.savefig(f"../images/text_freq/text_freq_{'_'.join(title_sources)}_{'_'.join(title_queries)}.png")
         helper.plt.show()
 
-        return None
+        return f"../images/text_freq/text_freq_{'_'.join(title_sources)}_{'_'.join(title_queries)}.png"
 
     def helper_remove_stopwords(self, input):
         """
@@ -576,7 +576,7 @@ class XForce_Grapher():
         helper.plt.savefig(f"../images/keyword_freq/keyword_freq_{'_'.join(title_sources)}_{'_'.join(title_queries)}.png")
         helper.plt.show()
 
-        return None
+        return f"../images/keyword_freq/keyword_freq_{'_'.join(title_sources)}_{'_'.join(title_queries)}.png"
 
     def graph_network_cooccurence(self, n: int=50, annotation_threshold: float=0.05) -> None:
         """
@@ -696,6 +696,8 @@ class XForce_Grapher():
         helper.plt.tight_layout()
         helper.plt.savefig(f"../images/network_cooccur/network_cooccur_{n}.png")
         helper.plt.show()
+
+        return f"../images/network_cooccur/network_cooccur_{n}.png"
     
     def graph_bubble_map(self, n: int=5, annotate_threshold: float=0.15) -> None:
         """ 
@@ -805,7 +807,8 @@ class XForce_Grapher():
         helper.plt.tight_layout()
         helper.plt.savefig(f"../images/bubble_map/bubble_map_{n}_{annotate_threshold}.png")
         helper.plt.show()
-        return
+
+        return f"../images/bubble_map/bubble_map_{n}_{annotate_threshold}.png"
     
 #----------------------------------------------------
 # Module Checking

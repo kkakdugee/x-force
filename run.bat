@@ -27,6 +27,9 @@ cd code
 :: Use pip to install the Python packages specified in requirements.txt located in root directory
 python -m pip install -r ..\requirements.txt
 
+:: Download NLTK corpora 'stopwords' and 'wordnet'
+python -c "import nltk; nltk.download('stopwords'); nltk.download('wordnet')"
+
 :: Use Streamlit to run the application script
 streamlit run Streamlit\app.py
 
