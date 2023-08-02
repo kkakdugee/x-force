@@ -24,9 +24,10 @@ from matplotlib.colors import Normalize
 import re
 import string
 from sklearn.feature_extraction.text import CountVectorizer
+import nltk
+nltk.download('stopwords')
 from nltk.stem import WordNetLemmatizer
 from nltk.corpus import stopwords
-import nltk
 import networkx as nx
 from scipy import sparse
 from wordcloud import WordCloud
