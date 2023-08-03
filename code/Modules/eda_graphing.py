@@ -237,10 +237,10 @@ class XForce_Grapher():
         helper.plt.grid("True")
         helper.plt.legend(loc='upper left', bbox_to_anchor=(1,1))
         helper.plt.tight_layout()
-        helper.plt.savefig(f"../../images/db_summ/db_summ.png")
+        helper.plt.savefig(f"../images/db_summ/db_summ.png")
         helper.plt.show()
 
-        return "../../images/db_summ/db_summ.png"
+        return "../images/db_summ/db_summ.png"
 
     def graph_pub_freq(self, 
                        queries: list=["ALL"], 
