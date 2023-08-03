@@ -1,7 +1,7 @@
 requests==2.31.0
 beautifulsoup4==4.12.2
 feedparser==6.0.10
-dotenv==1.0.0
+python-dotenv==1.0.0
 numpy
 pandas==2.0.2
 matplotlib==3.7.1

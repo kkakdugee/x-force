@@ -1,0 +1,23 @@
+def update_visuals(rows_to_display, col1):
+    df = helper.pd.read_csv('../data/complete_db.csv')  # Define 'df' here
+    if 'df_display' not in helper.st.session_state:
+        helper.st.session_state['df_display'] = col1.dataframe(df.head(rows_to_display), height=800)
+    else:
+        col1.dataframe(df.head(rows_to_display), height=800) # Use the same key here
+
+def display_database(col1):
+    df = helper.pd.read_csv('../data/complete_db.csv')
+    max_rows = df.shape[0]
+
+    if 'rows_to_display' not in helper.st.session_state:
+        helper.st.session_state['rows_to_display'] = max_rows // 2
+
+    rows_to_display = helper.st.sidebar.slider(
+        "Select the number of rows to display",
+        1, max_rows,
+        value=helper.st.session_state['rows_to_display'],
+        key="slider_key"
+    )
+    helper.st.session_state['rows_to_display'] = rows_to_display
+
+    update_visuals(rows_to_display, col1)
