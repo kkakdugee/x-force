@@ -107,39 +107,23 @@ TEMP_STOP_WORDS.append("inf")
 MASTER_STOP_WORDS = TEMP_STOP_WORDS
 
 #----------------------------------------------------
+# General Filepaths Variables
+#----------------------------------------------------
+# from perspective of app.py
+DEFAULT_DATABASE_FILEPATH = "../../data/complete_db.csv" 
+DEFAULT_CURR_WORKING_DATABASE_FILEPATH = "../../data/curr_filtered_db.csv"
+DEFAULT_FOLDER_FOR_DATABASE_FILEPATH = "../../data/"
+COMPLETE_DATABASE_FILEPATH = "../../data/complete_db.csv"
+
+#----------------------------------------------------
 # General DB Functions
 #----------------------------------------------------
 def reset_papers_db() -> None:
-    """
-    Resets/overwrites the "complete_db.csv" database. USE WITH CAUTION.
+    print("This function has been moved to db_functions.py instead of helper.py.")
+    return None
 
-    Returns
-        None
-
-    Example
-        reset_papers_db()
-    """
-    # Warning menu
-    while True:
-        user_input = input("Are you sure you want to run this function? This wipes the ENTIRE existing complete_db.csv database! (y/n)")
-        if user_input == "y":
-            print("Proceeding to wipe the entire database.")
-            break
-        elif user_input == "n":
-            print("Function canceled.")
-            return None
-        else:
-            print("Wrong input. Please type 'y' or 'n'.")
-
-    # Saving data to csv
-    df = pd.DataFrame(columns=MASTER_CSV_COLUMNS)
-    try:
-        df.to_csv("../data/complete_db.csv", index=False)
-        print("Saved!")
-    except:
-        print("Failed to save...")
-
-    # Return
+def remove_dupes(verbose: int=1) -> None:
+    print("This function has been moved to db_functions.py instead of helper.py.")
     return None
 
 def remove_dupes(verbose: int=1) -> None:
@@ -226,8 +210,6 @@ def generate_boolean_conditions(mode: str, conditions: list) -> str:
     
     # Return
     return expression
-
-
 
 #----------------------------------------------------
 # Module Checking
