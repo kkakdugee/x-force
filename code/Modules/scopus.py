@@ -105,7 +105,7 @@ def pull_requests(queries, start, max_result) -> None:
         print("Invalid value for max_result. Please enter a positive number.")
         return
 
-    data_path = '../data/complete_db.csv'
+    data_path = helper.COMPLETE_DATABASE_FILEPATH
     with open(data_path, 'a', newline='', encoding='utf-8') as file:
         writer = helper.csv.DictWriter(file, fieldnames=helper.MASTER_CSV_COLUMNS)
 

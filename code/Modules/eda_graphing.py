@@ -189,59 +189,6 @@ class XForce_Grapher():
         self.load(path)
         return None
 
-    def report_db_summary(self) -> None:
-        """ 
-        Prints a report table of the count of paper entries by query and by source.
-
-        Returns -> None
-            Both prints and returns the report dataframe.
-
-        Example
-            grapher = XForce_Grapher()
-            grapher.report_db_summary()
-        """
-        print(self._summary)
-        return None
-
-    def graph_db_summary(self) -> None:
-        """
-        Graphs the report summary as a stacked barchart.
-
-        Returns -> None
-            Prints out matplotlib graph of the report summary
-        
-        Example
-            grapher = XForce_Grapher()
-            grapher.graph_db_summary()
-        """
-        df = self._summary.copy()
-        extract_counts = df.T.values.tolist()[1:-1] # -1 to remove the "ALL" from the category
-        extract_queries = df.T.index.tolist()[1:-1]
-        sources = df["source"]
-
-        query_count_data = {}
-        for i in range(len(extract_counts)):
-            query_count_data[extract_queries[i]] = extract_counts[i]
-        
-        width = 0.5
-        fig, ax = helper.plt.subplots()
-        bottom = helper.np.zeros(3)
-
-        for query, count in query_count_data.items():
-            p = ax.bar(sources, count, width, label=query, bottom=bottom)
-            bottom += count
-
-        helper.plt.title(f"Distribution of {self._data_size} Articles")
-        helper.plt.xlabel("Source")
-        helper.plt.ylabel("Counts")
-        helper.plt.grid("True")
-        helper.plt.legend(loc='upper left', bbox_to_anchor=(1,1))
-        helper.plt.tight_layout()
-        helper.plt.savefig(f"../images/db_summ/db_summ.png")
-        helper.plt.show()
-
-        return "../images/db_summ/db_summ.png"
-
     def graph_pub_freq(self, 
                        queries: list=["ALL"], 
                        sources: list=["ALL"],
@@ -407,6 +354,64 @@ class XForce_Grapher():
         helper.plt.show()
 
         return f"../images/text_freq/text_freq_{'_'.join(title_sources)}_{'_'.join(title_queries)}.png"
+
+    def helper_remove_stopwords(self, input):
+        """
+        # TODO fill in docstring
+        """
+        words = input.split(" ")
+        filtered_words = [word for word in words if word not in helper.MASTER_STOP_WORDS]
+        output = " ".join(filtered_words)
+        return output
+    
+    def helper_lemmatizer(self, input):
+        """
+        # TODO fill in docstring
+        """
+        wordnet_lemmatizer = helper.WordNetLemmatizer()
+        words = input.split(" ")
+        lemma_words = [wordnet_lemmatizer.lemmatize(word) for word in words]
+        output = " ".join(lemma_words)
+        return output
+    
+    def helper_keyword_extractor(self, input):
+        """
+        # TODO fill in docstring
+        """
+        kw_model = helper.KeyBERT()
+        output = kw_model.extract_keywords(input, keyphrase_ngram_range=(1, 2), stop_words=helper.MASTER_STOP_WORDS)
+        return output
+
+    def helper_singularizer(self, input):
+        """
+        # TODO fill in docstring
+        """
+        blob = helper.TextBlob(input)
+        singular_nouns = [word.singularize() for word, tag in blob.tags if tag.startswith('NN')]
+        output = " ".join(singular_nouns)
+        return output
+
+    def helper_eval(self, input):
+        output = eval(input)
+        return output
+
+    def helper_extract_text(self, input):
+        input = eval(input)
+        output = [i[0] for i in input]
+        return output
+    
+    def helper_extract_value(self, input):
+        input = eval(input)
+        output = [i[1] for i in input]
+        return output
+    
+    def helper_extract_set(self, input):
+        output = set()
+        for i in input:
+            tokens = i.split(" ")
+            for token in tokens:
+                output.add(token)
+        return list(output)
 
     def helper_remove_stopwords(self, input):
         """
