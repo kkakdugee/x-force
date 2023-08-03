@@ -187,11 +187,11 @@ def map_yes_no(input: str, index: int) -> int:
     Example
         map_yes_no("y")
     """
-    if input.isdigit() and (index == 0 or index == 1):
+    if input.isdigit() and (index == 0):
         return input
-    elif input == "y" and (index == 2 or index == 3):
+    elif input == "y" and (index == 1):
         return 1
-    elif input == "n" and (index == 2 or index == 3):
+    elif input == "n" and (index == 1):
         return 0
     else:
         return None

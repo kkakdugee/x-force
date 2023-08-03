@@ -1,0 +1,2 @@
+enter your http proxy here
+enter your https proxy here
