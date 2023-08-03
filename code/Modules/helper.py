@@ -112,8 +112,12 @@ MASTER_STOP_WORDS = TEMP_STOP_WORDS
 # from perspective of app.py
 DEFAULT_DATABASE_FILEPATH = "../../data/complete_db.csv" 
 DEFAULT_CURR_WORKING_DATABASE_FILEPATH = "../../data/curr_filtered_db.csv"
-DEFAULT_FOLDER_FOR_DATABASE_FILEPATH = "../../data/"
+
 COMPLETE_DATABASE_FILEPATH = "../../data/complete_db.csv"
+DEFAULT_FOLDER_FOR_DATABASE_FILEPATH = "../../data/"
+
+RELATIVE_TO_MODULES_COMPLETE_DB = "../data/complete_db.csv"
+RELATIVE_TO_MODULES_DATA = "../data/"
 
 #----------------------------------------------------
 # General DB Functions
