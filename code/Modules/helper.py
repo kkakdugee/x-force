@@ -119,7 +119,7 @@ COMPLETE_DATABASE_FILEPATH = "../../data/complete_db.csv"
 # General DB Functions
 #----------------------------------------------------
 def reset_papers_db() -> None:
-    print("This function has been moved to db_functions.py instead of helper.py.")
+    print("This function has been moved to db_functions.py instead of helper.py. Renamed as reset_db.")
     return None
 
 def remove_dupes(verbose: int=1) -> None:
