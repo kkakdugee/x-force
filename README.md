@@ -31,19 +31,34 @@ If you have `git` installed on your system, you can clone the repository directl
 ***Option 2: Download the ZIP File***:
 If you don't have `git` installed or if you prefer to download the files manually, you can do so by clicking the `Code` button on the repository page and then clicking `Download ZIP`. After downloading the ZIP file, extract its contents into your desired directory. Remember, the directory where you extract or clone the project files will be referred to  as the 'root directory' for the project.
 
-### Step 2: Run the Executable
-Locate the batch file in the root directory of the project (it should be named `run.bat`). Run this file by  double-clicking it. This executable file will verify your Python installation, handle the installation of necessary dependencies automatically, and start the X-Force NLP Visualizer software tool.
+### Step 2: Set your proxies, if necessary
+Locate `proxies.txt` in the project root folder and input your proxies. Here is an example below:
+
+`http://proxy.example.com:8080`
+
+`https://proxy.example.com:200`
+
+_Note: The first line is your HTTP proxy and the second line is your HTTPS proxy._
+
+### Step 3: Run the Executable
+Locate the batch file in the root directory of the project (it should be named `run.bat`). Run this file by  double-clicking it. This executable file will set your proxies, verify your Python installation, handle the installation of necessary dependencies automatically, and start the NLP Research Visualizer software tool.
+
+---
 
 # User Guide
 This section will guide you through the process of using X-Force NLP Visualizer's features. It provides a detailed walkthrough of updating & analyzing the database, as well as graph configurations and feedback/support tickets.
 
 ## Major functions 
-1. [Updating the Database](#updating-the-database): Allows you to update your database with data from Scopus, arXiv, or both, based on your specified queries. 
+1. [Database](#the-database): Allows you to load, configure, and update a database.
 2. [Analyzing the Database](#analyzing-the-database): Enables you to analyze the trends in your research domain based on the updated database. 
 3. [Graph Configurations](#graph-configurations): Provides various configuration options to customize your trend graphs. 
 4. [Feedback/Help](#feedback-help): Offers a feedback system to help improve your user experience and aid in troubleshooting.
  ---
- 
+
+## 1. The Database
+
+TODO
+
 ## 1. Updating the Database
 
 ![Update DB Interface](./images/readme/Updating%20Database%20Interface.png)
@@ -57,7 +72,7 @@ This section will guide you through the process of using X-Force NLP Visualizer'
 4.  **Additional Parameters (optional)**: This field allows you to specify two additional parameters: "Max Paper Retrieval" and "Reporting Changes". Enter these parameters in a comma-separated list.
     
     -   **Max Paper Retrieval**: This parameter sets the maximum number of papers that the database update will retrieve from the selected sources.
-    -   **Reporting Changes**: When set to "True", this parameter will generate a report of the changes made during the update process.
+    -   **Reporting Changes**: When set to "y", this parameter will generate a report of the changes made during the update process. 
 5.  **Submit**: Once you have filled in the above parameters as desired, click the "Submit" button to initiate the database update process. The system will then query the selected database(s) based on your input and add relevant articles to your database.
     
 
