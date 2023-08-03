@@ -25,7 +25,6 @@ import re
 import string
 from sklearn.feature_extraction.text import CountVectorizer
 import nltk
-nltk.download('stopwords')
 from nltk.stem import WordNetLemmatizer
 from nltk.corpus import stopwords
 import networkx as nx
@@ -110,10 +109,10 @@ MASTER_STOP_WORDS = TEMP_STOP_WORDS
 # General Filepaths Variables
 #----------------------------------------------------
 # from perspective of app.py
-DEFAULT_DATABASE_FILEPATH = "../../data/complete_db.csv" 
-DEFAULT_CURR_WORKING_DATABASE_FILEPATH = "../../data/curr_filtered_db.csv"
-DEFAULT_FOLDER_FOR_DATABASE_FILEPATH = "../../data/"
-COMPLETE_DATABASE_FILEPATH = "../../data/complete_db.csv"
+DEFAULT_DATABASE_FILEPATH = "../data/complete_db.csv" 
+DEFAULT_CURR_WORKING_DATABASE_FILEPATH = "../data/curr_filtered_db.csv"
+DEFAULT_FOLDER_FOR_DATABASE_FILEPATH = "../data/"
+COMPLETE_DATABASE_FILEPATH = "../data/complete_db.csv"
 
 #----------------------------------------------------
 # General DB Functions
