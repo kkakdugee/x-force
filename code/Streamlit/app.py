@@ -159,7 +159,7 @@ def analyze_database(col1):
 
     elif analyze_option == "Keyword Frequency":
 
-        query_input = col2.text_input("Queries (Ex. ALL) (Ex. radiation,metamaterials,etc)").replace(" ", "")
+        query_input = helper.st.text_input("Queries (Ex. ALL) (Ex. radiation,metamaterials,etc)").replace(" ", "")
         queries = [i.strip() for i in query_input.split(",")]
 
         if query_input != "":
@@ -168,7 +168,7 @@ def analyze_database(col1):
                 
     elif analyze_option == "Publish Frequency":
 
-        query_input = col2.text_input("Queries (Ex. ALL) (Ex. radiation,metamaterials,etc)").strip()
+        query_input = helper.st.text_input("Queries (Ex. ALL) (Ex. radiation,metamaterials,etc)").strip()
         queries = [i.strip() for i in query_input.split(",")]
 
         if query_input != "":
@@ -177,7 +177,7 @@ def analyze_database(col1):
 
     elif analyze_option == "Text Frequency":
 
-        query_input = col2.text_input("Queries (Ex. ALL) (Ex. radiation,metamaterials,etc)").strip()
+        query_input = helper.st.text_input("Queries (Ex. ALL) (Ex. radiation,metamaterials,etc)").strip()
         queries = [i.strip() for i in query_input.split(",")]
 
         if query_input != "":
