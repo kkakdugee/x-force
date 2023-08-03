@@ -19,7 +19,7 @@ def select_database(col1):
 
 def update_database(col1):
 
-    df = helper.pd.read_csv('../data/complete_db.csv')
+    df = helper.pd.read_csv(helper.DEFAULT_DATABASE_FILEPATH)
     rows_to_display = df.shape[0]
 
     # display_database(col1)
