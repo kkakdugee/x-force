@@ -279,7 +279,7 @@ def feedback_help(col1):
         email = helper.st.text_input(label="Email:")
         issue_type = helper.st.selectbox("Select Type:", options=["Help", "Feedback"])
         feedback = helper.st.text_area(label="Describe your suggestion/needed assistance:")
-        github_token = helper.st.text_area(lavel="Please enter your GitHub Token: ")
+        github_token = helper.st.text_area(label="Please enter your GitHub Token: ")
         submit = helper.st.form_submit_button(label="Submit")
 
         if submit:
