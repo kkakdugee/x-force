@@ -92,6 +92,11 @@ def parse_request(feed: helper.feedparser.util.FeedParserDict, query: str, verbo
                     paper_data.append([item["name"] for item in paper[key]])
                 elif key == "link":
                     paper_data.append(paper[key][:-2])
+                elif key == "journal":
+                    if paper[key] is None or paper[key] == "":
+                        paper_data.append("arxiv")
+                    else:
+                        paper_data.append(paper[key])
                 else:
                     paper_data.append(paper[key])
             except:
