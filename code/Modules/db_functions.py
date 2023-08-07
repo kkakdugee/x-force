@@ -35,14 +35,6 @@ class XForce_Database():
         return extracted_file_names
 
     def select_db(self, path: str="") -> None:
-        if path == "" or path == helper.RELATIVE_TO_APP_DEFAULT_DB:
-            path = helper.RELATIVE_TO_APP_DEFAULT_DB
-        else:
-            if path in self.fetch_db_names():
-                path = helper.relativify_to_app(path)
-            else:
-                print(f"{path} not found in the data folder!")
-                return None
         
         df = helper.pd.read_csv(path)
         # IMPLEMENT IN COOP -> ADVANCED FILTER
@@ -60,7 +52,7 @@ class XForce_Database():
         self._current_working_db_length = len(df)
         self._current_working_db_headers = df.columns.tolist()
 
-        print(f"{self._selected_db_name} selected!")
+        # print(f"{self._selected_db_name} selected!")
         return None
     
     def clear_curr_db_filters(self) -> None:
@@ -109,8 +101,9 @@ class XForce_Database():
         # TODO documentation
         creates a new, empty db for data population and automatically switches to that new one
         """
+        print("From: new")
         if target_db_name in helper.RESERVED_DB_NAMES:
-            print(f"{target_db_name} is currently reserved. You cannot create, overwrite, or delete a DB with this name.")
+            raise IOError
         else:
             new_filepath = helper.relativify_to_app(target_db_name)
             try:
@@ -120,13 +113,14 @@ class XForce_Database():
                 print(f"Switching over to {self.get_selected_db_name()}!")
             except:
                 print("Failed to create new database.")
-        return None
+        return new_filepath
     
     def reset_curr_db(self) -> None:
         """
         # TODO documentation
         wipes the entries in the CURRENT WORKING db
         """
+        print("From: reset")
         print("By reseting or wiping a database, you are removing the entries within it but not deleting the database file itself.")
         new_filepath = self.get_selected_db_filepath()
         name = self.get_selected_db_name()
@@ -146,6 +140,7 @@ class XForce_Database():
         # TODO documentation
         deletes the current specified db
         """
+        print("From: delete_curr")
         print("By removing the file itself, this database will no longer appear in the selection dropdown.")
         new_filepath = self.get_selected_db_filepath()
         name = self.get_selected_db_name()
@@ -259,6 +254,7 @@ class XForce_Database():
         Example
             dedupe_curr_db()
         """
+        print("From: dedupe")
         print("This will reset all filters you currently have applied.")
         df = self.get_selected_db()
         name = self.get_selected_db_name()

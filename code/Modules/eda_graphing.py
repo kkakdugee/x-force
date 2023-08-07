@@ -54,9 +54,9 @@ class XForce_Grapher():
         self._sparse_matrix_names = None
         if is_demo:
             print("Dynamic load disabled in demo mode due to 11hr+ runtime. All functions are ran on database snapshot.")
-            self.load("../data/demo_db.csv")
+            self.load("../../data/demo_db.csv")
         else:
-            self.load("../data/complete_db.csv")
+            self.load(helper.RELATIVE_TO_APP_COMPLETE_DB)
         return None
 
     def load(self, path: str) -> None:
@@ -125,7 +125,7 @@ class XForce_Grapher():
         """
         # Demo check
         if is_demo:
-            self._nlp_summary = helper.pd.read_csv("../data/demo_db.csv")
+            self._nlp_summary = helper.pd.read_csv("../../data/demo_db.csv")
         else:
             # Filtering
             df = self._data.copy()
@@ -237,10 +237,10 @@ class XForce_Grapher():
         helper.plt.grid("True")
         helper.plt.legend(loc='upper left', bbox_to_anchor=(1,1))
         helper.plt.tight_layout()
-        helper.plt.savefig(f"../images/db_summ/db_summ.png")
+        helper.plt.savefig(f"../../images/db_summ/db_summ.png")
         helper.plt.show()
 
-        return "../images/db_summ/db_summ.png"
+        return "../../images/db_summ/db_summ.png"
 
     def graph_pub_freq(self, 
                        queries: list=["ALL"], 
@@ -304,7 +304,7 @@ class XForce_Grapher():
         dates = [helper.datetime(int(i.split("-")[0]), int(i.split("-")[1]), int(i.split("-")[2])) for i in dates_extract]
         
         # Graph
-        helper.plt.title(f"Source: {title_sources}, Query: {title_queries}", fontsize=3)
+        helper.plt.title(f"Source: {title_sources}, Query: {title_queries}")
         helper.plt.suptitle(f"Publish Frequency within {len(dates)} Most Recent Papers")
         helper.plt.xlabel("Publish Dates")
         helper.plt.ylabel("Frequency")
@@ -312,11 +312,11 @@ class XForce_Grapher():
         helper.plt.xticks(rotation=45)
         helper.plt.hist(dates, 25, alpha=.75)
         helper.plt.tight_layout()
-        helper.plt.savefig(f"../images/pub_freq/pub_freq_{'_'.join(title_sources)}_{'_'.join(title_queries)}.png")
+        helper.plt.savefig(f"../../images/pub_freq/pub_freq_{'_'.join(title_sources)}_{'_'.join(title_queries)}.png")
         helper.plt.show()
 
         # Return
-        return f"../images/pub_freq/pub_freq_{'_'.join(title_sources)}_{'_'.join(title_queries)}.png"
+        return f"../../images/pub_freq/pub_freq_{'_'.join(title_sources)}_{'_'.join(title_queries)}.png"
  
     def graph_text_freq(self, 
                          queries: list=["ALL"], 
@@ -403,10 +403,10 @@ class XForce_Grapher():
         helper.plt.boxplot(graph_data, positions=helper.np.array(range(len(graph_data)))*2.0, sym='', widths=1.5)
         helper.plt.xticks(range(0, len(queries)*2, 2), queries, rotation=45)
         helper.plt.tight_layout()
-        helper.plt.savefig(f"../images/text_freq/text_freq_{'_'.join(title_sources)}_{'_'.join(title_queries)}.png")
+        helper.plt.savefig(f"../../images/text_freq/text_freq_{'_'.join(title_sources)}_{'_'.join(title_queries)}.png")
         helper.plt.show()
 
-        return f"../images/text_freq/text_freq_{'_'.join(title_sources)}_{'_'.join(title_queries)}.png"
+        return f"../../images/text_freq/text_freq_{'_'.join(title_sources)}_{'_'.join(title_queries)}.png"
 
     def helper_remove_stopwords(self, input):
         """
@@ -631,10 +631,10 @@ class XForce_Grapher():
 
         # Saving
         helper.plt.tight_layout()
-        helper.plt.savefig(f"../images/keyword_freq/keyword_freq_{'_'.join(title_sources)}_{'_'.join(title_queries)}.png")
+        helper.plt.savefig(f"../../images/keyword_freq/keyword_freq_{'_'.join(title_sources)}_{'_'.join(title_queries)}.png")
         helper.plt.show()
 
-        return f"../images/keyword_freq/keyword_freq_{'_'.join(title_sources)}_{'_'.join(title_queries)}.png"
+        return f"../../images/keyword_freq/keyword_freq_{'_'.join(title_sources)}_{'_'.join(title_queries)}.png"
 
     def graph_network_cooccurence(self, n: int=50, annotation_threshold: float=0.05) -> None:
         """
@@ -658,7 +658,7 @@ class XForce_Grapher():
 
         # Edgelist data extraction
         if is_demo:
-            df_edgelist = helper.pd.read_csv("../data/demo_edgelist.csv")
+            df_edgelist = helper.pd.read_csv("../../data/demo_edgelist.csv")
             df_edgelist["0"] = df_edgelist["0"].apply(lambda x: self.helper_eval(x))
             edgelist = list(zip(df_edgelist["0"].values, df_edgelist["1"].values))
         else:
@@ -752,10 +752,10 @@ class XForce_Grapher():
 
         # Display the plot
         helper.plt.tight_layout()
-        helper.plt.savefig(f"../images/network_cooccur/network_cooccur_{n}.png")
+        helper.plt.savefig(f"../../images/network_cooccur/network_cooccur_{n}.png")
         helper.plt.show()
 
-        return f"../images/network_cooccur/network_cooccur_{n}.png"
+        return f"../../images/network_cooccur/network_cooccur_{n}.png"
     
     def graph_bubble_map(self, n: int=5, annotate_threshold: float=0.15) -> None:
         """ 
@@ -863,10 +863,10 @@ class XForce_Grapher():
 
         # Show & Save
         helper.plt.tight_layout()
-        helper.plt.savefig(f"../images/bubble_map/bubble_map_{n}_{annotate_threshold}.png")
+        helper.plt.savefig(f"../../images/bubble_map/bubble_map_{n}_{annotate_threshold}.png")
         helper.plt.show()
 
-        return f"../images/bubble_map/bubble_map_{n}_{annotate_threshold}.png"
+        return f"../../images/bubble_map/bubble_map_{n}_{annotate_threshold}.png"
     
 #----------------------------------------------------
 # Module Checking
