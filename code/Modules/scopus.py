@@ -25,14 +25,6 @@ HEADERS = {
     'X-ELS-APIKey': API_KEY
 }
 
-# Proxies
-
-proxies = {
-    'http':'http://130.163.13.200:8080',
-    'https':'http://130.163.13.200'
-}
-
-
 # Function to parse data received from API
 def parse_data(data, query) -> helper.List[helper.Dict[str, str]]:
 
@@ -49,7 +41,7 @@ def parse_data(data, query) -> helper.List[helper.Dict[str, str]]:
         published = field.get('prism:coverDate', 'N/A')
         pii = field.get('pii', "N/A")
         url = 'https://www.sciencedirect.com/science/article/abs/pii/' + str(pii)
-        abstract = "N/A" # scopus_scraper.get_abstract(url)
+        abstract = scopus_scraper.get_abstract(url) # field.get("dc:description", "N/A")
         affiliation_data = field.get('affiliation', [{}])[0]
         country = affiliation_data.get('affiliation-country', 'N/A')
         school = affiliation_data.get('affilname', 'N/A')
@@ -100,12 +92,11 @@ def handle_request(writer, query, start, count) -> bool:
     return True
 
 
-def pull_requests(queries, start, max_result) -> None:
+def pull_requests(data_path, queries, start, max_result) -> None:
     if max_result <= 0:
         print("Invalid value for max_result. Please enter a positive number.")
         return
-
-    data_path = helper.RELATIVE_TO_MODULES_COMPLETE_DB
+        
     with open(data_path, 'a', newline='', encoding='utf-8') as file:
         writer = helper.csv.DictWriter(file, fieldnames=helper.MASTER_CSV_COLUMNS)
 

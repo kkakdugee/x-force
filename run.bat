@@ -47,11 +47,11 @@ echo pip installation found.
 cd /D %~dp0
 
 :: Move to 'code' directory
-cd code
+cd code\Streamlit
 
 :: Use pip to install the Python packages specified in requirements.txt located in root directory
 echo Checking if requirements.txt modules are up to date...
-python -m pip install -r ..\requirements.txt > temp.txt
+python -m pip install -r ..\..\requirements.txt > temp.txt
 
 :: Check if the temporary file contains the word "Installing" or "Upgrading"
 findstr /C:"Installing" /C:"Upgrading" temp.txt >nul 2>&1
@@ -64,11 +64,9 @@ if !errorlevel! == 0 (
 :: Delete the temporary file
 del temp.txt
 
-:: Download NLTK corpora 'stopwords' and 'wordnet'
-python -c "import nltk; nltk.download('stopwords'); nltk.download('wordnet')"
 
 :: Use Streamlit to run the application script in the background
-start /B streamlit run Streamlit\app.py
+start /B streamlit run app.py
 
 :: Provide an option to kill the Streamlit app
 :menu
@@ -77,7 +75,7 @@ choice /c kq /n
 if %errorlevel%==1 (
     :: Kill the Streamlit app
     taskkill /IM streamlit.exe /F
-    cd .. 
+    cd .. && cd ..
     goto normal_prompt
 )
 if %errorlevel%==2 (
