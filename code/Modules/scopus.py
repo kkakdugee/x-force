@@ -25,14 +25,6 @@ HEADERS = {
     'X-ELS-APIKey': API_KEY
 }
 
-# Proxies
-
-proxies = {
-    'http':'http://130.163.13.200:8080',
-    'https':'http://130.163.13.200'
-}
-
-
 # Function to parse data received from API
 def parse_data(data, query) -> helper.List[helper.Dict[str, str]]:
 
@@ -49,7 +41,7 @@ def parse_data(data, query) -> helper.List[helper.Dict[str, str]]:
         published = field.get('prism:coverDate', 'N/A')
         pii = field.get('pii', "N/A")
         url = 'https://www.sciencedirect.com/science/article/abs/pii/' + str(pii)
-        abstract = "placeholder" # scopus_scraper.get_abstract(url)
+        abstract = scopus_scraper.get_abstract(url) # field.get("dc:description", "N/A")
         affiliation_data = field.get('affiliation', [{}])[0]
         country = affiliation_data.get('affiliation-country', 'N/A')
         school = affiliation_data.get('affilname', 'N/A')
