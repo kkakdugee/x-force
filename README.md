@@ -4,12 +4,12 @@
 
 1. [Overview](#overview)
 
-2.  [Installation Guide](#installation-guide)
+2. [Installation Guide](#installation-guide)
 
-3.  [User Guide](#user-guide)
+3. [User Guide](#user-guide)
   
 # Overview
-The X-Force NLP Visualizer is a research assistance tool, aimed to offer a streamlined and efficient way to identify trending topics in scientific and academic research. This tool provides visual analytics of key trends and hot topics in specific research domains by parsing through multiple academic databases.
+The NLP Research Visualizer is a research assistance tool, aimed to offer a streamlined and efficient way to identify trending topics in scientific and academic research. This tool provides visual analytics of key trends and hot topics in specific research domains by parsing through multiple academic databases.
 
 #  Installation Guide
   
@@ -57,34 +57,14 @@ This section will guide you through the process of using X-Force NLP Visualizer'
 
 ## 1. The Database
 
-TODO
+1. **Database Preview:** A preview of the current state of your database is displayed.
 
-## 1. Updating the Database
+2. **Selecting & Creating a Database:** This tab allows you to load a pre-existing Database, or create a new Database.
 
-![Update DB Interface](./images/readme/Updating%20Database%20Interface.png)
+3. **Updating the Database:** This tab allows you to add entries by query to your selected Database.
 
+4. **Filtering the Database:** This tab allows you to filter your selected Database.
 
-1. **Database Preview**: A preview of the current state of your database is displayed. You can control the number of rows shown using the slider at the side of the page.
-2.  **Update From**: This dropdown menu allows you to select the source from which the database will be updated. Your options are Scopus, arXiv, or both.
-    
-3.  **Queries**: This text box allows you to enter your search queries. You should input your queries in a comma-separated list. For example, if you wish to search for papers related to "Artificial Intelligence" and "Machine Learning", you would input "Artificial Intelligence, Machine Learning".
-    
-4.  **Additional Parameters (optional)**: This field allows you to specify two additional parameters: "Max Paper Retrieval" and "Reporting Changes". Enter these parameters in a comma-separated list.
-    
-    -   **Max Paper Retrieval**: This parameter sets the maximum number of papers that the database update will retrieve from the selected sources.
-    -   **Reporting Changes**: When set to "y", this parameter will generate a report of the changes made during the update process. 
-5.  **Submit**: Once you have filled in the above parameters as desired, click the "Submit" button to initiate the database update process. The system will then query the selected database(s) based on your input and add relevant articles to your database.
-    
-
-Beyond updating the database, X-Force NLP Visualizer also provides options for managing duplicate entries and resetting the database.
-
-### Removing Duplicate Entries from the Database
-
-To ensure the quality and accuracy of your research, it may be necessary to remove any duplicate entries from your database. To do this, click on the "Remove Duplicates from Database" button. The tool will automatically find and remove any duplicate entries.
-
-### Wiping the Database
-
-In some cases, you may need to completely reset your database. To do this, click on the "Wipe Database" button. Please note that this action is irreversible and will permanently delete all entries in your database. Be sure to backup any necessary data before proceeding with this action.
 
 ---
 
@@ -94,22 +74,14 @@ In some cases, you may need to completely reset your database. To do this, click
 
 The "Analyze Database" functionality offers four types of visualizations, each designed to help you better understand the distribution and frequency of specific keywords within your databases. These visualizations include:
 
-1. **Database Summary**: The "Database Summary" generates a graph showing the distribution of articles among the Scopus, arXiv, and both databases.
+1. **Database Summary:** The "Database Summary" generates a graph showing the distribution of articles among the Scopus, arXiv, and both databases.
 
-2. **Keyword Frequency**: The "Keyword Frequency" visualization generates a graph depicting the frequency of your inputted queries from selected databases.
-	- **Parameters:**
-		-   **From:** Choose from Scopus, arXiv, or both as the source for your graph.
-		-   **Queries:** Input your desired search queries. Format these as a comma-separated list. (e.g., "Artificial Intelligence, Machine Learning", "ALL")
+2. **Keyword Frequency:** The "Keyword Frequency" visualization generates a graph depicting the frequency of your filtered queries from the selected database.
 
- 3. **Publish Frequency**: The "Publish Frequency" visualization creates a graph showing the publishing frequency of the inputted queries from selected databases.
+ 3. **Publish Frequency:** The "Publish Frequency" visualization creates a graph showing the publishing frequency of your filtered queries from the selected database.
 
-	-	**Parameters:** Same as "Keyword Frequency"
+4. **Text Frequency:** The "Text Frequency" visualization constructs a graph showing the text frequency (e.g., character/word count of title/abstract) of filtered queries from the selected database.
 
-4. **Text Frequency**: The "Text Frequency" visualization constructs a graph showing the text frequency (e.g., character/word count of title/abstract) of indicated queries from selected databases.
-
-	-	**Parameters:** Same as "Keyword Frequency"
-
-_Note: For "Keyword Frequency", "Publish Frequency", and "Text Frequency", be sure to select your source and input your queries in the given parameters. Each visualization relies on these inputs to provide accurate and specific results._
 
 ---
 ## 3. Graph Configurations
@@ -153,4 +125,8 @@ The Feedback/Help section contains a simple form for you to fill out.
 
 4. **Describe your suggestion/needed assistance:** In this text area, provide a detailed description of your feedback or the help you require. If you're reporting an issue, try to include as much information about what you were doing when the problem occurred and any error messages you saw.
 
+5. **GitHub Token:** Enter your GitHub Personal Access Token. 
+
 Click the "Submit" button to send us your feedback or help request. The tool automatically creates an issue in our GitHub repository for each submitted feedback or help request, allowing us to track and respond to your needs effectively. 
+
+_Note: A GitHub Personal Access Token can be created [here](https://github.com/settings/tokens?type=beta). Under **Repository access**, select **Only select repositories**, and select this repository (x-force). For permissions, please only enable access for **Issues**. For the access level, select **Read and write**._

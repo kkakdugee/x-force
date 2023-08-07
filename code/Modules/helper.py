@@ -25,7 +25,6 @@ import re
 import string
 from sklearn.feature_extraction.text import CountVectorizer
 import nltk
-nltk.download('stopwords')
 from nltk.stem import WordNetLemmatizer
 from nltk.corpus import stopwords
 import networkx as nx
