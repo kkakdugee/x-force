@@ -1,25 +1,20 @@
 #----------------------------------------------------
 # TODO
 #----------------------------------------------------
-# IMPORT eda graphign ipynb and add the todos here
+# None
 
 #----------------------------------------------------
 # Imports Checking
 #----------------------------------------------------
 import helper
+# is_demo = True 
 
 #----------------------------------------------------
-# Global Variable
-#----------------------------------------------------
-is_demo = False
-
-#----------------------------------------------------
-# Helper Class
+# Mapper Class
 #----------------------------------------------------
 class TextNorm(helper.Normalize):
     """
-    # TODO: finish documention
-    Map a list of text values to the float range 0-1
+    Class for mapping text to a float, which is then used to automatically generate graphing colors.
     """
 
     def __init__(self, textvals, clip=False):
@@ -42,6 +37,9 @@ class TextNorm(helper.Normalize):
 # Graphing Class
 #----------------------------------------------------
 class XForce_Grapher():
+    """
+    Class for handling all graphing. Reads in data from curr_filtered_db.csv by default.
+    """
     def __init__(self) -> None:
         self._data = None
         self._sources = None
@@ -51,14 +49,30 @@ class XForce_Grapher():
         self._data_size = None
         self._sparse_matrix = None
         self._sparse_matrix_names = None
-        if is_demo:
-            print("Dynamic load disabled in demo modee. All functions are ran on database snapshot.")
-            self.load(helper.RELATIVE_TO_APP_DEMO)
-        else:
-            self.load(helper.RELATIVE_TO_APP_DEFAULT_CURR_WORKING_DB)
+
+        # if is_demo:
+        #     print("Dynamic load disabled in demo modee. All functions are ran on database snapshot.")
+        #     self.load(helper.RELATIVE_TO_APP_DEMO)
+        # else:
+        #     self.load(helper.RELATIVE_TO_APP_DEFAULT_CURR_WORKING_DB)
+
+        self.load(helper.RELATIVE_TO_APP_DEFAULT_CURR_WORKING_DB)
         return None
 
     def load(self, path: str) -> None:
+        """ 
+        Wrapper for all load functions.
+
+        path -> str
+            The file path for the given database to load, which is used in .load_db().
+
+        Returns -> None
+            Runs all the load functions
+
+        Example
+            grapher = XForce_Grapher()
+            grapher.load(path="../../db.csv")
+        """
         self.load_db(path)
         self.load_db_summary()
         self.load_nlp_summary()
@@ -76,7 +90,7 @@ class XForce_Grapher():
 
         Example
             grapher = XForce_Grapher()
-            grapher.load_db()
+            grapher.load_db(path="../../db.csv")
         """
         df = helper.pd.read_csv(path)
         sources = list(set(df["source"].values.tolist()))
@@ -197,6 +211,9 @@ class XForce_Grapher():
             return None
 
     def select_db(self, path: str) -> None:
+        """ 
+        Wrapper for .load(). Please refer to .load().
+        """
         self.load(path)
         return None
     
@@ -256,7 +273,8 @@ class XForce_Grapher():
     def graph_pub_freq(self,
                        country_mode: int=1) -> None:
         """
-        # TODO Add country_mode
+        # TODO
+        # COOP IDEA: Add country mode, which is only available in Scopus.
 
         Graphs the publishing frequency of papers in the database.
 
@@ -269,22 +287,27 @@ class XForce_Grapher():
         
         Example
             grapher = XForce_Grapher()
-            grapher.graph_pub_freq(["ALL"], ["ALL"], 1)
+            grapher.graph_pub_freq(country_mode=1)
         """
         # Input Error Handling
         country_mode_options = {0,1}
         if country_mode not in country_mode_options:
             print(f"{country_mode} invalid, must be {country_mode_options}")
             return None
+        else:
+            if country_mode == 1:
+                print("Only Scopus data returns the country of origin. This graph will be based on only the Scopus entries in the database; if your pre-filter contains no Scopus data, then this graph will be empty.")
 
         # Load Data
         df = self._data.copy()
+        if country_mode == 1:
+            df = df[df["source"] == "scopus"]
         
         # Data Setup
         dates_extract = df["published"].apply(lambda x: x.split('T')[0])
         dates = [helper.datetime(int(i.split("-")[0]), int(i.split("-")[1]), int(i.split("-")[2])) for i in dates_extract]
-        title_sources = self.get_sources()
-        title_queries = self.get_queries()
+        title_sources = set(df["source"].values.tolist())
+        title_queries = set(df["query"].values.tolist())
         
         # Graph
         helper.plt.title(f"Source: {title_sources}, Query: {title_queries}")

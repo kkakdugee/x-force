@@ -51,19 +51,7 @@ cd code\Streamlit
 
 :: Use pip to install the Python packages specified in requirements.txt located in root directory
 echo Checking if requirements.txt modules are up to date...
-python -m pip install -r ..\..\requirements.txt > temp.txt
-
-:: Check if the temporary file contains the word "Installing" or "Upgrading"
-findstr /C:"Installing" /C:"Upgrading" temp.txt >nul 2>&1
-if !errorlevel! == 0 (
-    echo Updates found:
-    type temp.txt
-) else (
-    echo Requirements are up to date.
-)
-:: Delete the temporary file
-del temp.txt
-
+python -m pip install -r ..\..\requirements.txt
 
 :: Use Streamlit to run the application script in the background
 start /B streamlit run app.py
