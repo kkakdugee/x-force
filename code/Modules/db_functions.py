@@ -106,6 +106,7 @@ class XForce_Database():
             raise IOError
         else:
             new_filepath = helper.relativify_to_app(target_db_name)
+            print(new_filepath)
             try:
                 df = helper.pd.DataFrame(columns=helper.MASTER_CSV_COLUMNS)
                 df.to_csv(new_filepath, index=False)
@@ -120,7 +121,6 @@ class XForce_Database():
         # TODO documentation
         wipes the entries in the CURRENT WORKING db
         """
-        print("From: reset")
         print("By reseting or wiping a database, you are removing the entries within it but not deleting the database file itself.")
         new_filepath = self.get_selected_db_filepath()
         name = self.get_selected_db_name()
@@ -131,6 +131,7 @@ class XForce_Database():
             try:
                 df.to_csv(new_filepath, index=False)
                 self.select_db(new_filepath)
+                print("resetted")
             except:
                 print("Failed to reset/wipe.")
         return None
@@ -140,7 +141,6 @@ class XForce_Database():
         # TODO documentation
         deletes the current specified db
         """
-        print("From: delete_curr")
         print("By removing the file itself, this database will no longer appear in the selection dropdown.")
         new_filepath = self.get_selected_db_filepath()
         name = self.get_selected_db_name()
@@ -254,8 +254,7 @@ class XForce_Database():
         Example
             dedupe_curr_db()
         """
-        print("From: dedupe")
-        print("This will reset all filters you currently have applied.")
+        print("This will remove all duplicates within the selected database.")
         df = self.get_selected_db()
         name = self.get_selected_db_name()
 
@@ -265,7 +264,7 @@ class XForce_Database():
         print(f"Removed {pre_len - post_len} duplicates ({pre_len} -> {post_len})!")
 
         df.to_csv(helper.relativify_to_app(name), index=False)
-        self.select_db(name)
+        self.select_db(helper.relativify_to_app(name))
 
         return None
 

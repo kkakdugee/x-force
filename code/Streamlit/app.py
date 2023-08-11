@@ -62,6 +62,7 @@ def select_database(col1):
                 session.db_path = session.db_manager.new_db(db_name)
                 session.db_manager.select_db(session.db_path)
                 session.db_selected = True
+                session.db_working = session.db_manager.get_current_working_db()
                 helper.st.success(f"Successfully created and loaded {db_name}!")
 
             except IOError:
@@ -115,7 +116,6 @@ def update_database(col1):
 
                 status.write(f"Pulling data from {update_option}...")
 
-                print(session.db_path)
 
                 if update_option == "arXiv" or update_option == "ALL":
                     arxiv.pull_requests(session.db_path, queries, 0, int(max_paper_retrieval), reporting_changes, 1)
@@ -145,7 +145,7 @@ def update_database(col1):
             status = helper.st.empty()
 
             status.write("Removing duplicate entries from Database...")
-            helper.st.session_state.db_manager.dedupe_curr_db()
+            session.db_manager.dedupe_curr_db()
             status.write("Succesfully removed duplicate entries from Database!")
 
             helper.time.sleep(2.5)
@@ -157,12 +157,12 @@ def update_database(col1):
 
             status = helper.st.empty()
 
-            status.write("Are you sure? This action cannot be undone.")
+            helper.st.warning("Are you sure? This action cannot be undone.")
 
             yes_or_no = helper.st.columns([1,1])
 
             if yes_or_no[0].button("Yes"):
-                helper.st.session_state.db_manager.reset_curr_db()
+                session.db_manager.reset_curr_db()
             if yes_or_no[1].button("No"):
                 status.write("")
 
@@ -177,10 +177,16 @@ def filter_database(col1):
     
     if session.db_selected:
 
-        start_row = helper.st.number_input("Start Row", min_value=0, max_value=len(session.db_working)-1)
+        working_len = len(session.db_working)
+
+        if working_len > 1:
+            working_len -= 1
+
+        start_row = helper.st.number_input("Start Row", min_value=0, max_value=len(session.db_working))
         end_row = helper.st.number_input("End Row", min_value=start_row, max_value=len(session.db_working), value=len(session.db_working))
         if helper.st.button("Filter Rows"):
             session.db_manager.filter_curr_rows(start_row, end_row)
+            session.db_working = session.db_manager.get_current_working_db()
 
         # Source Filtering
         sources = session.db_working["source"].unique().tolist()
@@ -188,6 +194,7 @@ def filter_database(col1):
         selected_sources = helper.st.multiselect("Select Sources", sources, default=["ALL"])
         if helper.st.button("Filter Sources"):
             session.db_manager.filter_curr_source(selected_sources)
+            session.db_working = session.db_manager.get_current_working_db()
 
         # Query Filtering
         queries = session.db_working["query"].unique().tolist()
@@ -195,6 +202,7 @@ def filter_database(col1):
         selected_queries = helper.st.multiselect("Select Queries", queries, default=["ALL"])
         if helper.st.button("Filter Queries"):
             session.db_manager.filter_curr_query(selected_queries)
+            session.db_working = session.db_manager.get_current_working_db()
 
         # Title Filtering
         title_values = helper.st.text_input("Title Values (comma-separated)")
@@ -207,28 +215,37 @@ def filter_database(col1):
         abstract_and_or_condition = helper.st.selectbox("Abstract Condition", ["AND", "OR"], index=0)
         if helper.st.button("Filter Abstracts"):
             session.db_manager.filter_curr_abstract(abstract_values.split(','), 0 if abstract_and_or_condition == "AND" else 1)
+            session.db_working = session.db_manager.get_current_working_db()
 
         # Author Filtering
         author_values = helper.st.text_input("Author Values (comma-separated)")
         author_and_or_condition = helper.st.selectbox("Author Condition", ["AND", "OR"], index=0)
         if helper.st.button("Filter Authors"):
             session.db_manager.filter_curr_author(author_values.split(','), 0 if author_and_or_condition == "AND" else 1)
+            session.db_working = session.db_manager.get_current_working_db()
 
         # Date Filtering 
         start_date = helper.st.date_input("Start Date")
         end_date = helper.st.date_input("End Date")
         if helper.st.button("Filter Dates"):
             session.db_manager.filter_curr_date(start_date, end_date)
+            session.db_working = session.db_manager.get_current_working_db()
 
         # Sorting
         sort_on = helper.st.selectbox("Sort On", session.db_working.columns.tolist())
         is_ascending = helper.st.checkbox("Ascending Order")
         if helper.st.button("Sort"):
             session.db_manager.sort_curr_db(sort_on, is_ascending)
+            session.db_working = session.db_manager.get_current_working_db()
 
         # Reset Filters
         if helper.st.button("Clear Filters"):
             session.db_manager.clear_curr_db_filters()
+            session.db_working = session.db_manager.get_current_working_db()
+
+        if helper.st.button("Confirm"):
+            session.db_manager.confirm_db()
+            session.db_working = session.db_manager.get_current_working_db()
 
         display_database(col1)
 

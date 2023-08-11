@@ -16,13 +16,18 @@ helper.load_dotenv() # load environment variables
 
 # API key from environment variable
 API_KEY = helper.os.getenv('SCOPUS_API_KEY')
+
+# Institution Token from environment variable
+INST_TOKEN = helper.os.getenv('SCOPUS_INST_TOKEN')
+
 # Scopus API url
 SCOPUS_URL = 'https://api.elsevier.com/content/search/scopus'
 
 # Headers for the API request
 HEADERS = {
     'Accept': 'application/json',
-    'X-ELS-APIKey': API_KEY
+    'X-ELS-APIKey': API_KEY,
+    'X-ELS-Insttoken': INST_TOKEN
 }
 
 # Function to parse data received from API
