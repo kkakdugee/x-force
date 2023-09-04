@@ -778,7 +778,7 @@ class XForce_Grapher():
 
         # Setting up color/label scheme
         norm = TextNorm(queries)
-        cmap = helper.cm.get_cmap('RdYlGn')
+        cmap = helper.cm.get_cmap('tab20')
         label_color_dict = {}
 
         # Plotting
