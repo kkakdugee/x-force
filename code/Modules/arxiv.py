@@ -92,6 +92,11 @@ def parse_request(feed: helper.feedparser.util.FeedParserDict, query: str, verbo
                     paper_data.append([item["name"] for item in paper[key]])
                 elif key == "link":
                     paper_data.append(paper[key][:-2])
+                elif key == "journal":
+                    if paper[key] is None or paper[key] == "":
+                        paper_data.append("arxiv")
+                    else:
+                        paper_data.append(paper[key])
                 else:
                     paper_data.append(paper[key])
             except:
@@ -154,7 +159,7 @@ def helper_remove_dupes(df: helper.pd.core.frame.DataFrame, verbose: int=1) -> h
         pre_len = len(df)
 
     # Removing dupes
-    database = helper.pd.read_csv("../data/complete_db.csv")
+    database = helper.pd.read_csv(helper.RELATIVE_TO_APP_COMPLETE_DB)
     database = database[database["source"] == "arxiv"]
     checks = database["url"].values.tolist()
     for check in checks:
@@ -224,9 +229,12 @@ def fetch_parse_request(query: str=helper.DEFAULT_SEARCH_QUERY, start: int=0, ma
     # Return
     return results
 
-def merge_request(list_of_dfs: list, verbose: int=1) -> None:
+def merge_request(db_path: str, list_of_dfs: list, verbose: int=1) -> None:
     """
     Merges the dfs of paper entries into to the completed_db.csv, regardless of whether paper entries are duplicates.
+
+    db_path -> str
+        path of the working database
 
     list_of_dfs -> list
         List of pd.core.frame.DataFrames to merge with completed_db.csv.
@@ -248,39 +256,42 @@ def merge_request(list_of_dfs: list, verbose: int=1) -> None:
         return None
 
     if verbose == 1:
-            database = helper.pd.read_csv("../data/complete_db.csv")
+            database = helper.pd.read_csv(db_path)
             super_pre_len = len(database)
 
     for index, df in enumerate(list_of_dfs):
         print(f"Merging {index+1}/{len(list_of_dfs)}...")
         # Save df
         if verbose == 1:
-            database = helper.pd.read_csv("../data/complete_db.csv")
+            database = helper.pd.read_csv(db_path)
             pre_len = len(database)
             print(f"Attempting to add {len(df)} entries...")
 
         try:
-            df.to_csv("../data/complete_db.csv", mode='a', index=False, header=False)
+            df.to_csv(db_path, mode='a', index=False, header=False)
             print("Saved!")
         except:
             print("Failed to save.")
 
         if verbose == 1:
-            database = helper.pd.read_csv("../data/complete_db.csv")
+            database = helper.pd.read_csv(db_path)
             post_len = len(database)
             print(f"Added {post_len - pre_len} entries ({pre_len} -> {post_len})!")
     
     if verbose == 1:
-        database = helper.pd.read_csv("../data/complete_db.csv")
+        database = helper.pd.read_csv(db_path)
         super_post_len = len(database)
         print(f"In summary, added {super_post_len - super_pre_len} entries ({super_pre_len} -> {super_post_len})!")
 
     # return
     return None
 
-def pull_request(query: str=helper.DEFAULT_SEARCH_QUERY, start: int=0, max_results: int=25, verbose: int=1, remove_dupes: int=1) -> None:
+def pull_request(db_path: str, query: str=helper.DEFAULT_SEARCH_QUERY, start: int=0, max_results: int=25, verbose: int=1, remove_dupes: int=1) -> None:
     """
     Adds indicated number of paper entries for the given query to the completed_db.csv.
+
+    db_path ->
+        The path of the working database
 
     query -> str
         The given search query for arxiv to find papers on
@@ -308,12 +319,15 @@ def pull_request(query: str=helper.DEFAULT_SEARCH_QUERY, start: int=0, max_resul
     print("------PART 1: FETCH PARSE")
     list_of_dfs = fetch_parse_request(query=query, start=start, max_results=max_results, verbose=verbose, remove_dupes=remove_dupes)
     print("------PART 2: MERGE")
-    merge_request(list_of_dfs, verbose=verbose)
+    merge_request(db_path, list_of_dfs, verbose=verbose)
     return None
 
-def pull_requests(queries: list, start: int=0, max_results: int=25, verbose: int=1, remove_dupes: int=1) -> None:
+def pull_requests(db_path: str, queries: list, start: int=0, max_results: int=25, verbose: int=1, remove_dupes: int=1) -> None:
     """
     Adds indicated number of paper entries for the given queries to the completed_db.csv.
+
+    db_path -> str
+        The path of the working database
 
     queries -> list
         The given search queries for arxiv to find papers on, contained in a list
@@ -343,7 +357,7 @@ def pull_requests(queries: list, start: int=0, max_results: int=25, verbose: int
         print("--------------------")
         print(f"PULLING {query}.")
         print("--------------------")
-        pull_request(query=query, start=start, max_results=max_results, verbose=verbose, remove_dupes=remove_dupes)
+        pull_request(db_path=db_path, query=query, start=start, max_results=max_results, verbose=verbose, remove_dupes=remove_dupes)
         print(f"DONE WITH {query}.")
 
     return None

@@ -1,30 +1,24 @@
 #----------------------------------------------------
 # TODO
 #----------------------------------------------------
-# IMPORT eda graphign ipynb and add the todos here
+# None
 
 #----------------------------------------------------
 # Imports Checking
 #----------------------------------------------------
 import helper
+# is_demo = True 
 
 #----------------------------------------------------
-# Global Variable
-#----------------------------------------------------
-is_demo = True
-
-#----------------------------------------------------
-# Helper Class
+# Mapper Class
 #----------------------------------------------------
 class TextNorm(helper.Normalize):
     """
-    # TODO: finish documention
-    Map a list of text values to the float range 0-1
+    Class for mapping text to a float, which is then used to automatically generate graphing colors.
     """
 
     def __init__(self, textvals, clip=False):
         self._clip = clip
-        # if you want, clean text here, for duplicate, sorting, etc
         ltextvals = set(textvals)
         self.N = len(ltextvals)
         self.textmap = dict(
@@ -43,6 +37,9 @@ class TextNorm(helper.Normalize):
 # Graphing Class
 #----------------------------------------------------
 class XForce_Grapher():
+    """
+    Class for handling all graphing. Reads in data from curr_filtered_db.csv by default.
+    """
     def __init__(self) -> None:
         self._data = None
         self._sources = None
@@ -52,14 +49,30 @@ class XForce_Grapher():
         self._data_size = None
         self._sparse_matrix = None
         self._sparse_matrix_names = None
-        if is_demo:
-            print("Dynamic load disabled in demo mode due to 11hr+ runtime. All functions are ran on database snapshot.")
-            self.load("../data/demo_db.csv")
-        else:
-            self.load("../data/complete_db.csv")
+
+        # if is_demo:
+        #     print("Dynamic load disabled in demo modee. All functions are ran on database snapshot.")
+        #     self.load(helper.RELATIVE_TO_APP_DEMO)
+        # else:
+        #     self.load(helper.RELATIVE_TO_APP_DEFAULT_CURR_WORKING_DB)
+
+        self.load(helper.RELATIVE_TO_APP_DEFAULT_CURR_WORKING_DB)
         return None
 
     def load(self, path: str) -> None:
+        """ 
+        Wrapper for all load functions.
+
+        path -> str
+            The file path for the given database to load, which is used in .load_db().
+
+        Returns -> None
+            Runs all the load functions
+
+        Example
+            grapher = XForce_Grapher()
+            grapher.load(path="../../db.csv")
+        """
         self.load_db(path)
         self.load_db_summary()
         self.load_nlp_summary()
@@ -67,7 +80,17 @@ class XForce_Grapher():
 
     def load_db(self, path: str) -> None:
         """ 
-        # TODO DOCUMENTATION
+        Extracts the length, sources, queries, and data for indicated database and stores it in class attributes.
+
+        path -> str
+            The file path for the given database to load.
+
+        Returns -> None
+            Stores the report dataframe into class attribute.
+
+        Example
+            grapher = XForce_Grapher()
+            grapher.load_db(path="../../db.csv")
         """
         df = helper.pd.read_csv(path)
         sources = list(set(df["source"].values.tolist()))
@@ -125,8 +148,10 @@ class XForce_Grapher():
         """
         # Demo check
         if is_demo:
-            self._nlp_summary = helper.pd.read_csv("../data/demo_db.csv")
+            self._nlp_summary = helper.pd.read_csv(helper.RELATIVE_TO_APP_DEMO)
         else:
+            # Warning
+            print("Loading NLP cleaning. May take upwards of 11hrs.")
             # Filtering
             df = self._data.copy()
             df = df[["source", "query", "published", "url", "title", "abstract"]]
@@ -185,10 +210,13 @@ class XForce_Grapher():
             print("Please run .load_nlp_summary() first.")
             return None
 
-    def set_data(self, path: str) -> None:
+    def select_db(self, path: str) -> None:
+        """ 
+        Wrapper for .load(). Please refer to .load().
+        """
         self.load(path)
         return None
-
+    
     def report_db_summary(self) -> None:
         """ 
         Prints a report table of the count of paper entries by query and by source.
@@ -237,28 +265,18 @@ class XForce_Grapher():
         helper.plt.grid("True")
         helper.plt.legend(loc='upper left', bbox_to_anchor=(1,1))
         helper.plt.tight_layout()
-        helper.plt.savefig(f"../images/db_summ/db_summ.png")
+        helper.plt.savefig(f"../../images/db_summ/db_summ.png")
         helper.plt.show()
 
-        return None
+        return "../../images/db_summ/db_summ.png"
 
-    def graph_pub_freq(self, 
-                       queries: list=["ALL"], 
-                       sources: list=["ALL"],
+    def graph_pub_freq(self,
                        country_mode: int=1) -> None:
         """
-        # TODO Fix scopus date. Do not you run "ALL" for sources.
-        # TODO Add country_mode
+        # TODO
+        # COOP IDEA: Add country mode, which is only available in Scopus.
 
         Graphs the publishing frequency of papers in the database.
-
-        queries -> list
-            The given list of search queries (can be a 1-item list) that match database queries
-            ALL: Considers all queries
-
-        sources -> list
-            The given list of search sources (can be a 1-item list) that match database sources
-            ALL: Considers all sources
 
         country_mode -> int
             0: graphs the bars of the bar chart as normal bars
@@ -269,42 +287,30 @@ class XForce_Grapher():
         
         Example
             grapher = XForce_Grapher()
-            grapher.graph_pub_freq(["ALL"], ["ALL"], 1)
+            grapher.graph_pub_freq(country_mode=1)
         """
         # Input Error Handling
         country_mode_options = {0,1}
         if country_mode not in country_mode_options:
             print(f"{country_mode} invalid, must be {country_mode_options}")
             return None
-
-        for source in sources:
-            if source not in self._sources:
-                raise ValueError(f"{source} invalid, must be {self._sources}")
-        
-        for query in queries:
-            if query not in self._queries:
-                raise ValueError(f"{query} invalid, must be {self._queries}")
+        else:
+            if country_mode == 1:
+                print("Only Scopus data returns the country of origin. This graph will be based on only the Scopus entries in the database; if your pre-filter contains no Scopus data, then this graph will be empty.")
 
         # Load Data
         df = self._data.copy()
-        
-        # Filter Data
-        title_sources, title_queries = ["ALL"], ["ALL"]
-        if "ALL" not in sources:
-            expression = helper.generate_boolean_conditions("source", sources)
-            df = df[eval(expression)]
-            title_sources = sources
-        if "ALL" not in queries:
-            expression = helper.generate_boolean_conditions("query", queries)
-            df = df[eval(expression)]
-            title_queries = queries
+        if country_mode == 1:
+            df = df[df["source"] == "scopus"]
         
         # Data Setup
         dates_extract = df["published"].apply(lambda x: x.split('T')[0])
         dates = [helper.datetime(int(i.split("-")[0]), int(i.split("-")[1]), int(i.split("-")[2])) for i in dates_extract]
+        title_sources = set(df["source"].values.tolist())
+        title_queries = set(df["query"].values.tolist())
         
         # Graph
-        helper.plt.title(f"Source: {title_sources}, Query: {title_queries}", fontsize=3)
+        helper.plt.title(f"Source: {title_sources}, Query: {title_queries}")
         helper.plt.suptitle(f"Publish Frequency within {len(dates)} Most Recent Papers")
         helper.plt.xlabel("Publish Dates")
         helper.plt.ylabel("Frequency")
@@ -312,27 +318,17 @@ class XForce_Grapher():
         helper.plt.xticks(rotation=45)
         helper.plt.hist(dates, 25, alpha=.75)
         helper.plt.tight_layout()
-        helper.plt.savefig(f"../images/pub_freq/pub_freq_{'_'.join(title_sources)}_{'_'.join(title_queries)}.png")
+        helper.plt.savefig(f"../../images/pub_freq/pub_freq_{'_'.join(title_sources)}_{'_'.join(title_queries)}.png")
         helper.plt.show()
 
         # Return
-        return None
+        return f"../../images/pub_freq/pub_freq_{'_'.join(title_sources)}_{'_'.join(title_queries)}.png"
  
-    def graph_text_freq(self, 
-                         queries: list=["ALL"], 
-                         sources: list=["ALL"], 
+    def graph_text_freq(self,
                          text_mode: str="word", 
                          type_mode: str="abstract") -> None:
         """
         Graphs the text frequency (eg. character/word count of title/abstract) of indicated papers
-
-        queries -> list
-            The given list of search queries (can be a 1-item list) that match database queries
-            ALL: Considers all queries
-
-        sources -> list
-            The given list of search sources (can be a 1-item list) that match database sources
-            ALL: Considers all sources
 
         text_mode -> str
             Given type mode to filter on
@@ -352,14 +348,6 @@ class XForce_Grapher():
             grapher.graph_text_freq(queries=["radiation", "plasmonics"], source=["arxiv"], text_mode="word", type_mode="abstract")
         """
         # Input Error Handling
-        for source in sources:
-            if source not in self._sources:
-                raise ValueError(f"{source} invalid, must be {self._sources}")
-        
-        for query in queries:
-            if query not in self._queries:
-                raise ValueError(f"{query} invalid, must be {self._queries}")
-
         text_mode_options = {"char", "word"}
         if text_mode not in text_mode_options:
             raise ValueError(f"{text_mode} invalid; must be {text_mode_options}")
@@ -369,25 +357,12 @@ class XForce_Grapher():
             raise ValueError(f"{type_mode} invalid; must be {type_mode_options}")
 
         # Load Data
-        if self._nlp_summary is None:
-            print("Please run .load_nlp_summary() first, ETA ~1 minute.")
-            return
         df = self._nlp_summary.copy()
-        
-        # Filter Data
-        title_sources, title_queries = ["ALL"], ["ALL"]
-        if "ALL" not in sources:
-            expression = helper.generate_boolean_conditions("source", sources)
-            df = df[eval(expression)]
-            title_sources = sources
-        if "ALL" not in queries:
-            expression = helper.generate_boolean_conditions("query", queries)
-            df = df[eval(expression)]
-            title_queries = queries
-        else:
-            queries = self._queries[:-1]
 
         # Data Setup
+        queries = self.get_queries()
+        title_queries = self.get_queries()
+        title_sources = self.get_sources()
         expression = f"{type_mode}_{text_mode}_count"
         graph_data = []
         for query in queries:
@@ -403,10 +378,10 @@ class XForce_Grapher():
         helper.plt.boxplot(graph_data, positions=helper.np.array(range(len(graph_data)))*2.0, sym='', widths=1.5)
         helper.plt.xticks(range(0, len(queries)*2, 2), queries, rotation=45)
         helper.plt.tight_layout()
-        helper.plt.savefig(f"../images/text_freq/text_freq_{'_'.join(title_sources)}_{'_'.join(title_queries)}.png")
+        helper.plt.savefig(f"../../images/text_freq/text_freq_{'_'.join(title_sources)}_{'_'.join(title_queries)}.png")
         helper.plt.show()
 
-        return None
+        return f"../../images/text_freq/text_freq_{'_'.join(title_sources)}_{'_'.join(title_queries)}.png"
 
     def helper_remove_stopwords(self, input):
         """
@@ -466,15 +441,11 @@ class XForce_Grapher():
                 output.add(token)
         return list(output)
 
-    def graph_keyword_freq(self, 
-                           queries: list=["ALL"], 
-                           sources: list=["ALL"], 
+    def graph_keyword_freq(self,
                            type_mode: str="abstract", 
                            k: int=15, 
                            n_gram: int=2) -> None:
         """
-        # TODO Currently works with demo_db.csv 
-
         Graphs the keyword frequency of the specified papers. 
 
         queries -> list
@@ -504,37 +475,18 @@ class XForce_Grapher():
             grapher.graph_text_count(queries=["radiation", "plasmonics"], source="arxiv", type_mode="abstract", k=15, n_grams=1)
         """
         # Input Error Handling
-        for source in sources:
-            if source not in self._sources:
-                raise ValueError(f"{source} invalid, must be {self._sources}")
-        
-        for query in queries:
-            if query not in self._queries:
-                raise ValueError(f"{query} invalid, must be {self._queries}")
-
         type_mode_options = {"title", "abstract"}
         if type_mode not in type_mode_options:
             raise ValueError(f"{type_mode} invalid; must be {type_mode_options}")
 
         # Load Data
-        if self._nlp_summary is None:
-            print("Please run .load_nlp_summary() first, ETA ~1 minute.")
-            return
         df = self._nlp_summary.copy()
-        print("Running .graph_keyword_freq(), ETA ~1.5 minutes.")
 
         # Filter Data
-        title_sources, title_queries = ["ALL"], ["ALL"]
-        if "ALL" not in sources:
-            expression = helper.generate_boolean_conditions("source", sources)
-            df = df[eval(expression)]
-            title_sources = sources
-        if "ALL" not in queries:
-            expression = helper.generate_boolean_conditions("query", queries)
-            df = df[eval(expression)]
-            title_queries = queries
-        else:
-            queries = self._queries[:-1]
+        queries = self.get_queries()
+        title_sources = self.get_sources()
+        title_queries = self.get_queries()
+        
         df[f"{type_mode}_keywords"] = df[f"{type_mode}_keywords"].apply(lambda x: self.helper_eval(x))
         keywords = df[f"{type_mode}_keywords"]
         keyword_freq = {}
@@ -573,10 +525,10 @@ class XForce_Grapher():
 
         # Saving
         helper.plt.tight_layout()
-        helper.plt.savefig(f"../images/keyword_freq/keyword_freq_{'_'.join(title_sources)}_{'_'.join(title_queries)}.png")
+        helper.plt.savefig(f"../../images/keyword_freq/keyword_freq_{'_'.join(title_sources)}_{'_'.join(title_queries)}.png")
         helper.plt.show()
 
-        return None
+        return f"../../images/keyword_freq/keyword_freq_{'_'.join(title_sources)}_{'_'.join(title_queries)}.png"
 
     def graph_network_cooccurence(self, n: int=50, annotation_threshold: float=0.05) -> None:
         """
@@ -587,11 +539,6 @@ class XForce_Grapher():
         # -----------------------
         # DATA SETUP GRAPHING
         # -----------------------
-        # Error Handling
-        if self._nlp_summary is None:
-            print("Please run .load_nlp_summary() first, ETA ~1 minute.")
-            return
-
         # Raw data extraction
         corpus = self._nlp_summary[["abstract_keywords", "query"]]
         corpus["keyword_labels"] = corpus.iloc[:, 0].apply(lambda x: self.helper_extract_text(x))
@@ -600,10 +547,11 @@ class XForce_Grapher():
 
         # Edgelist data extraction
         if is_demo:
-            df_edgelist = helper.pd.read_csv("../data/demo_edgelist.csv")
+            df_edgelist = helper.pd.read_csv(helper.RELATIVE_TO_APP_DEMO_EDGE)
             df_edgelist["0"] = df_edgelist["0"].apply(lambda x: self.helper_eval(x))
             edgelist = list(zip(df_edgelist["0"].values, df_edgelist["1"].values))
         else:
+            print("Generating edgelist. Depending on the size of the filtered, can take upwards of 2hrs.")
             edgelist = []
             unique_keys = set()
             for set_item in corpus["keyword_unique_labels"]:
@@ -694,8 +642,10 @@ class XForce_Grapher():
 
         # Display the plot
         helper.plt.tight_layout()
-        helper.plt.savefig(f"../images/network_cooccur/network_cooccur_{n}.png")
+        helper.plt.savefig(f"../../images/network_cooccur/network_cooccur_{n}.png")
         helper.plt.show()
+
+        return f"../../images/network_cooccur/network_cooccur_{n}.png"
     
     def graph_bubble_map(self, n: int=5, annotate_threshold: float=0.15) -> None:
         """ 
@@ -703,11 +653,6 @@ class XForce_Grapher():
         # n = number of top keywords per query
         # annotate_threshold = radius of individual circle, if radius is larger than given, then annotate
         """
-        # Error Handling
-        if self._nlp_summary is None:
-            print("Please run .load_nlp_summary() first, ETA ~1 minute.")
-            return
-
         # Data Cleaning
         corpus = self._nlp_summary[["abstract_keywords", "query"]]
 
@@ -803,9 +748,10 @@ class XForce_Grapher():
 
         # Show & Save
         helper.plt.tight_layout()
-        helper.plt.savefig(f"../images/bubble_map/bubble_map_{n}_{annotate_threshold}.png")
+        helper.plt.savefig(f"../../images/bubble_map/bubble_map_{n}_{annotate_threshold}.png")
         helper.plt.show()
-        return
+
+        return f"../../images/bubble_map/bubble_map_{n}_{annotate_threshold}.png"
     
 #----------------------------------------------------
 # Module Checking

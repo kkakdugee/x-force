@@ -24,9 +24,9 @@ from matplotlib.colors import Normalize
 import re
 import string
 from sklearn.feature_extraction.text import CountVectorizer
+import nltk
 from nltk.stem import WordNetLemmatizer
 from nltk.corpus import stopwords
-import nltk
 import networkx as nx
 from scipy import sparse
 from wordcloud import WordCloud
@@ -101,75 +101,62 @@ META_CSV_COLUMNS = ["query",
                     "date_of_last_index_extraction"
                     ]
 
+COLUMNS_WITH_NESTED_DATA = ["authors", "tags"]
+
 TEMP_STOP_WORDS = stopwords.words('english')
 TEMP_STOP_WORDS.append("inf")
 MASTER_STOP_WORDS = TEMP_STOP_WORDS
 
 #----------------------------------------------------
+# General Filepaths Variables
+#----------------------------------------------------
+# from perspective of app.py
+RELATIVE_TO_APP_DEFAULT_DB = "../../data/complete_db.csv" 
+RELATIVE_TO_APP_DEFAULT_CURR_WORKING_DB = "../../data/curr_filtered_db.csv"
+RELATIVE_TO_APP_COMPLETE_DB = "../../data/complete_db.csv"
+RELATIVE_TO_APP_DATA = "../../data/"
+
+RELATIVE_TO_MODULES_COMPLETE_DB = "../data/complete_db.csv"
+RELATIVE_TO_MODULES_DATA = "../data/"
+
+RESERVED_DB_NAMES = ["demo_db", "demo_edgelist", "curr_filtered_db", "complete_db"] #cant delete or create a new db with these names
+PROTECTED_DB_NAMES = ["demo_db", "demo_edgelist"] #cant wipe these
+
+def relativify_to_app(filename):
+    """
+    # TODO documentation
+    # creates the final path from given name
+    """
+    return f"{RELATIVE_TO_APP_DATA}{filename}.csv"
+
+def relativify_to_modules(filename):
+    """
+    # TODO documentation
+    # creates the final path from given name
+    """
+    return f"{RELATIVE_TO_MODULES_DATA}{filename}.csv"
+
+#----------------------------------------------------
 # General DB Functions
 #----------------------------------------------------
 def reset_papers_db() -> None:
-    """
-    Resets/overwrites the "complete_db.csv" database. USE WITH CAUTION.
-
-    Returns
-        None
-
-    Example
-        reset_papers_db()
-    """
-    # Warning menu
-    while True:
-        user_input = input("Are you sure you want to run this function? This wipes the ENTIRE existing complete_db.csv database! (y/n)")
-        if user_input == "y":
-            print("Proceeding to wipe the entire database.")
-            break
-        elif user_input == "n":
-            print("Function canceled.")
-            return None
-        else:
-            print("Wrong input. Please type 'y' or 'n'.")
-
-    # Saving data to csv
-    df = pd.DataFrame(columns=MASTER_CSV_COLUMNS)
-    try:
-        df.to_csv("../data/complete_db.csv", index=False)
-        print("Saved!")
-    except:
-        print("Failed to save...")
-
-    # Return
+    print("This function has been moved to db_functions.py instead of helper.py. Renamed as reset_db.")
     return None
 
 def remove_dupes(verbose: int=1) -> None:
-    """ 
-    Manually remove duplicates in complete_db.csv of duplicate arvix entries.
-
-    verbose -> int
-        0: suppresses reporting on changes to the database
-        1: reports on changes to database
-    
-    Returns -> None
-        complete_db.csv is clean of duplicates via the "url" column
-    
-    Example
-        remove_dupes()
-    """
-    database = pd.read_csv("../data/complete_db.csv")
-    
-    if verbose == 1:
-        pre_len = len(database)
-    
-    database = database[~database.duplicated("url")]
-    
-    if verbose == 1:
-        post_len = len(database)
-        print(f"Removed {pre_len - post_len} duplicates ({pre_len} -> {post_len})!")
-
-    database.to_csv("../data/complete_db.csv", index=False)
-    print("De-duplicated version saved!")
-    
+    print("This function has been moved to db_functions.py instead of helper.py.")
     return None
+
+def remove_dupes(verbose: int=1) -> None:
+    print("This function has been moved to db_functions.py instead of helper.py. Renamed as dedupe_db.")
+    return None
+
+def eval_db_values(input):
+    if type(input) != str:
+        output = "N/A"
+    else:
+        output = eval(input)
+    return output
 
 def map_yes_no(input: str, index: int) -> int:
     """ 
@@ -187,11 +174,11 @@ def map_yes_no(input: str, index: int) -> int:
     Example
         map_yes_no("y")
     """
-    if input.isdigit() and (index == 0 or index == 1):
+    if input.isdigit() and (index == 0):
         return input
-    elif input == "y" and (index == 2 or index == 3):
+    elif input == "y" and (index == 1):
         return 1
-    elif input == "n" and (index == 2 or index == 3):
+    elif input == "n" and (index == 1):
         return 0
     else:
         return None
@@ -226,7 +213,23 @@ def generate_boolean_conditions(mode: str, conditions: list) -> str:
     # Return
     return expression
 
+def generate_robust_boolean_conditions(mode: str, conditions: list, and_or_condition: int=0) -> str:
+    """ 
+    # TODO
+    """
+    if and_or_condition == 0:
+        operator = "|"
+    elif and_or_condition == 1:
+        operator = "&"
+    else:
+        print(f"{and_or_condition} is not valid for the and_or_condition argument; use (0) for AND, (1) for OR")
+        return None
 
+    condition_prefix = f"df['{mode}'].str.contains('"
+    expression = f" {operator} ".join([f"({condition_prefix}{condition}'))" for condition in conditions])
+    
+    # Return
+    return expression
 
 #----------------------------------------------------
 # Module Checking

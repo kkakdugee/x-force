@@ -1,0 +1,9 @@
+,source,query,query_time,title,journal,authors,doi,published,abstract,url,tags
+0,arxiv,radiation,18:57.2,"Electromagnetic Cascade Emission from Neutrino-Coincident Tidal
+  Disruption Events",,"['Chengchao Yuan', 'Walter Winter']",,2023-06-27T17:54:29Z,"The potential association between Tidal Disruption Events (TDEs) and high-energy astrophysical neutrinos implies the acceleration of cosmic rays. These accelerated particles will initiate electromagnetic (EM) cascades spanning from keV to GeV energies by the processes related to neutrino production. We model the EM cascade and neutrino emissions by numerically solving the time-dependent transport equations and discuss the implications for AT2019dsg and AT2019fdr in the X-ray and $\gamma$-ray bands. We show that the $\gamma$-ray constraints from \emph{Fermi} can constrain the size of the radiation zone and the maximum energy of injected protons, and that the corresponding expected neutrino event numbers in follow-up searches are limited to be less than about 0.1. Depending on the efficiency of $p\gamma$ interactions, the X-ray and $\gamma$-ray signals can be expected closer to the peak of the optical-ultraviolet (OUV) luminosity, or to the time of the neutrino production.",http://arxiv.org/abs/2306.15659,"[{'term': 'astro-ph.HE', 'scheme': 'http://arxiv.org/schemas/atom', 'label': None}, {'term': 'hep-ph', 'scheme': 'http://arxiv.org/schemas/atom', 'label': None}]"
+14,arxiv,radiation,18:57.2,"Electromagnetic Cascade Emission from Neutrino-Coincident Tidal
+  Disruption Events",,"['Chengchao Yuan', 'Walter Winter']",,,,,
+15,arxiv,radiation,18:57.2,"Electromagnetic Cascade Emission from Neutrino-Coincident Tidal
+  Disruption Events",,"['Chengchao Yuan', 'Walter Winter']",,,,,
+16,  arxiv,radiation,18:57.2,"EEEEEEE Electromagnetic Cascade Emission from Neutrino-Coincident Tidal
+  Disruption Events",,['Walter Winter'],,,,,

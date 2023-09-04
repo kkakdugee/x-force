@@ -1,0 +1,16 @@
+requests==2.31.0
+beautifulsoup4==4.12.2
+feedparser==6.0.10
+python-dotenv==1.0.0
+numpy
+pandas==2.0.2
+matplotlib==3.7.1
+scikit-learn==1.3.0
+scipy==1.11.1
+streamlit==1.23.1
+nltk==3.8.1
+networkx==3.1
+wordcloud==1.9.2
+textblob==0.17.1
+keybert==0.7.0
+circlify==0.15.0

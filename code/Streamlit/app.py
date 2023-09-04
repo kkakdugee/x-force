@@ -1,195 +1,303 @@
 #----------------------------------------------------
-# TODO
-#----------------------------------------------------
-# ?
-
-<<<<<<< HEAD
-sys.path.append("../code/Modules/")
-=======
-#----------------------------------------------------
 # Imports Checking
 #----------------------------------------------------
 import sys
-sys.path.append("../code/Modules")
->>>>>>> 7d2915ff87cdc153f459327ec7d9b3ce7274f07c
+sys.path.append("../../code/Modules")
 import arxiv
 import scopus
 import helper
 import eda_graphing
+import db_functions
 
-<<<<<<< HEAD
-=======
 #----------------------------------------------------
 # Graphing Class
 #----------------------------------------------------
-def display_database(col1, key):
 
-    df = helper.pd.read_csv('../data/complete_db.csv')
+def display_database(col1):
 
-    max_rows = df.shape[0]
+    if 'db_placeholder' not in session:
+        session.db_placeholder = col1.empty()
 
-    rows_to_display = helper.st.sidebar.slider("Select the number of rows to display", 1, max_rows, value= (max_rows // 2), key=key)
-    
-    with col1:
-        helper.st.dataframe(df.head(rows_to_display), height=800)
+    session.db_placeholder.dataframe(helper.pd.read_csv(session.db_path), height=800)
 
 
-def update_database(col1, col2):
 
-    display_database(col1, "db_slider")
+def select_database(col1):
 
-    update_option = helper.st.selectbox(
-        'Update from:',
-        ['arXiv', 'Scopus', 'ALL']
-    )
+    uploaded_database = helper.st.file_uploader("Upload a Database:", type="csv")
 
-    query_input = col2.text_input("Queries (Ex. radiation) (Ex. radiation,metamaterials,etc)").strip()
-    queries = [i.strip() for i in query_input.split(",")]
+    if uploaded_database is not None:
 
-    additional_param_input = col2.text_input("Additional Parameters: Max Paper Retrieval and Reporting Changes (y/n). (Ex. 76, n) Leave blank for Default (25, y)").strip()
-    additional_param = [i.strip() for i in additional_param_input.split(",")]
+        session.db_path = helper.RELATIVE_TO_APP_DATA + uploaded_database.name
+
+        try:
+
+            session.db_manager.select_db(session.db_path)
+            session.db_selected = True
+            session.db_working = session.db_manager.get_current_working_db()
+            helper.st.success(f'Database loaded successfully!')
+
+        except IOError:
+
+            helper.st.error(f'Could not find the database file {session.db_path}.')
+
+    else:
+
+        helper.st.info("Please upload a Database CSV.")
 
 
-    if col2.button("Submit"):
+    helper.st.write("")
+    helper.st.write("")
 
-        status = helper.st.empty()
+    # Creating new Database
+    helper.st.write("Create a new Database")
+    db_name = helper.st.text_input("Name your Database")
 
-        valid_additional_params = True
+    if helper.st.button("Create new Database"):
 
-        if len(additional_param) == 1 and additional_param_input == "":
-            additional_param = ["0", "25", "y", "y"]
-        
-        additional_param = [helper.map_yes_no(param, i) for i, param in enumerate(additional_param)]
-        valid_additional_params = all(param is not None for param in additional_param)
+        if db_name:
 
-        query_blank = query_input == ""
+            try:
 
-        if not query_blank and valid_additional_params:
+                session.db_path = session.db_manager.new_db(db_name)
+                session.db_manager.select_db(session.db_path)
+                session.db_selected = True
+                helper.st.success(f"Successfully created and loaded {db_name}!")
 
-            status.write(f"Pulling data from {update_option}...")
+            except IOError:
+                helper.st.error(f"{db_name} is currently reserved. You cannot create, overwrite, or delete a DB with this name.")
 
-            if update_option == "arXiv" or update_option == "ALL":
-                arxiv.pull_requests(queries, 0, int(additional_param[1]), additional_param[2], 1)
-            if update_option == "Scopus" or update_option == "ALL":
-                scopus.pull_requests(queries, 0, int(additional_param[1]))
-             
-            status.write(f"Succesfully obtained {query_input} data from {update_option}!")
+    if session.db_path is not None:
+        display_database(col1)
+
+
+def update_database(col1):
+
+    if session.db_selected:
+
+        display_database(col1)
+
+        update_option = helper.st.selectbox(
+            'Update from:',
+            ['arXiv', 'Scopus', 'ALL']
+        )
+
+        query_input = helper.st.text_input("Queries (Ex. radiation) (Ex. radiation,metamaterials,etc)").strip()
+        queries = [i.strip() for i in query_input.split(",")]
+
+        additional_param_input = helper.st.text_input("Additional Parameters: Max Paper Retrieval and Reporting Changes (y/n). (Ex. 76, n) Leave blank for Default (25, y)").strip()
+        additional_param = [i.strip() for i in additional_param_input.split(",")]
+
+
+        if helper.st.button("Submit"):
+
+            status = helper.st.empty()
+
+            valid_additional_params = True
+
+            if len(additional_param) == 1 and additional_param_input == "":
+                additional_param = ["25", "y"]
+
+            if len(additional_param) != 2:
+                valid_additional_params = False
+
+            max_paper_retrieval = helper.map_yes_no(additional_param[0].strip(), 0)
+            reporting_changes = helper.map_yes_no(additional_param[1].strip(), 1)
+
+            if max_paper_retrieval is None or reporting_changes is None:
+
+                valid_additional_params = False
+
+
+            query_blank = query_input == ""
+
+            if not query_blank and valid_additional_params:
+
+                status.write(f"Pulling data from {update_option}...")
+
+                print(session.db_path)
+
+                if update_option == "arXiv" or update_option == "ALL":
+                    arxiv.pull_requests(session.db_path, queries, 0, int(max_paper_retrieval), reporting_changes, 1)
+                if update_option == "Scopus" or update_option == "ALL":
+                    scopus.pull_requests(session.db_path, queries, 0, int(max_paper_retrieval))
+
+                status.write(f"Succesfully obtained {query_input} data from {update_option}!")
+
+                helper.time.sleep(2.5)
+                status.empty()
+
+                display_database(col1)
+
+            elif query_blank:
+
+                status.write("Please input a query.")
+
+            elif not valid_additional_params:
+
+                status.write("Invalid Additional Parameters. Please try again.")
+
+        helper.st.write("")
+        helper.st.write("")
+
+        if helper.st.button("Remove Duplicates from Database"):
+
+            status = helper.st.empty()
+
+            status.write("Removing duplicate entries from Database...")
+            helper.st.session_state.db_manager.dedupe_curr_db()
+            status.write("Succesfully removed duplicate entries from Database!")
 
             helper.time.sleep(2.5)
             status.empty()
 
-            display_database(col1, "db_slider")
+            display_database(col1)
 
-        elif query_blank:
+        if helper.st.button("Wipe Database"):
 
-            status.write("Please input a query.")
-        
-        elif not valid_additional_params:
+            status = helper.st.empty()
 
-            status.write("Invalid Additional Parameters. Please try again.")
+            status.write("Are you sure? This action cannot be undone.")
 
-    helper.st.write("")
-    helper.st.write("")
+            yes_or_no = helper.st.columns([1,1])
 
-    if col2.button("Remove Duplicates from Database"):
+            if yes_or_no[0].button("Yes"):
+                helper.st.session_state.db_manager.reset_curr_db()
+            if yes_or_no[1].button("No"):
+                status.write("")
 
-        status = helper.st.empty()
+            status.empty()
 
-        status.write("Removing duplicate entries from Database...")
-        helper.remove_dupes()
-        status.write("Succesfully removed duplicate entries from Database!")
-                
-        helper.time.sleep(2.5)
-        status.empty()
+            display_database(col1)
+    else:
 
-        display_database(col1, "db_slider")
+        helper.st.warning("Please load a database in the \"Select\" tab before proceeding")
 
-    if col2.button("Wipe Database"):
-
-        status = helper.st.empty()
-
-        status.write("Are you sure? This action cannot be undone.")
-
-        yes_or_no = helper.st.columns([1,1])
-
-        if yes_or_no[0].button("Yes"):
-            status.write("Wiping Database...")
-        if yes_or_no[1].button("No"):
-            status.write("")
-            
-        status.empty()
-
-        display_database(col1, "db_slider")
+def filter_database(col1):
     
+    if session.db_selected:
+
+        start_row = helper.st.number_input("Start Row", min_value=0, max_value=len(session.db_working)-1)
+        end_row = helper.st.number_input("End Row", min_value=start_row, max_value=len(session.db_working), value=len(session.db_working))
+        if helper.st.button("Filter Rows"):
+            session.db_manager.filter_curr_rows(start_row, end_row)
+
+        # Source Filtering
+        sources = session.db_working["source"].unique().tolist()
+        sources.append("ALL")
+        selected_sources = helper.st.multiselect("Select Sources", sources, default=["ALL"])
+        if helper.st.button("Filter Sources"):
+            session.db_manager.filter_curr_source(selected_sources)
+
+        # Query Filtering
+        queries = session.db_working["query"].unique().tolist()
+        queries.append("ALL")
+        selected_queries = helper.st.multiselect("Select Queries", queries, default=["ALL"])
+        if helper.st.button("Filter Queries"):
+            session.db_manager.filter_curr_query(selected_queries)
+
+        # Title Filtering
+        title_values = helper.st.text_input("Title Values (comma-separated)")
+        title_and_or_condition = helper.st.selectbox("Title Condition", ["AND", "OR"], index=0)
+        if helper.st.button("Filter Titles"):
+            session.db_manager.filter_curr_title(title_values.split(','), 0 if title_and_or_condition == "AND" else 1)
+
+        # Abstract Filtering
+        abstract_values = helper.st.text_input("Abstract Values (comma-separated)")
+        abstract_and_or_condition = helper.st.selectbox("Abstract Condition", ["AND", "OR"], index=0)
+        if helper.st.button("Filter Abstracts"):
+            session.db_manager.filter_curr_abstract(abstract_values.split(','), 0 if abstract_and_or_condition == "AND" else 1)
+
+        # Author Filtering
+        author_values = helper.st.text_input("Author Values (comma-separated)")
+        author_and_or_condition = helper.st.selectbox("Author Condition", ["AND", "OR"], index=0)
+        if helper.st.button("Filter Authors"):
+            session.db_manager.filter_curr_author(author_values.split(','), 0 if author_and_or_condition == "AND" else 1)
+
+        # Date Filtering 
+        start_date = helper.st.date_input("Start Date")
+        end_date = helper.st.date_input("End Date")
+        if helper.st.button("Filter Dates"):
+            session.db_manager.filter_curr_date(start_date, end_date)
+
+        # Sorting
+        sort_on = helper.st.selectbox("Sort On", session.db_working.columns.tolist())
+        is_ascending = helper.st.checkbox("Ascending Order")
+        if helper.st.button("Sort"):
+            session.db_manager.sort_curr_db(sort_on, is_ascending)
+
+        # Reset Filters
+        if helper.st.button("Clear Filters"):
+            session.db_manager.clear_curr_db_filters()
+
+        display_database(col1)
+
+    else:
+
+        helper.st.warning("Please load a database in the \"Select\" tab before proceeding")
+
+def database(col1, col2):
+
+    with col2:
+
+        tab1, tab2, tab3 = helper.st.tabs(["Select", "Update", "Filter"])
+
+        with tab1:
+            select_database(col1)
+
+        with tab2:
+            update_database(col1)
+
+        with tab3:
+            filter_database(col1)
+
+
+def display_image(col, image, caption):
+
+    with col:
+        helper.st.image(image, caption=caption, use_column_width=True)
+
 
 def analyze_database(col1, col2):
 
-    analyze_option = helper.st.selectbox(
-        'Select Visualization',
-        ['Database Summary', 'Keyword Frequency', 'Publish Frequency', 'Text Frequency']
-    )
+    with col2:
 
-    grapher = eda_graphing.XForce_Grapher() 
+        if session.db_selected:
 
-    db_option = "ALL"
+            analyze_option = helper.st.selectbox(
+                'Select Visualization',
+                ['Database Summary', 'Keyword Frequency', 'Publish Frequency', 'Text Frequency', 'Network Co-Occurence', 'Bubble Map']
+            )
 
-    if analyze_option != "Database Summary":
+            if helper.st.button("Submit"):
 
-        db_option = helper.st.selectbox(
-            'From:',
-            ['arXiv', 'Scopus', 'ALL']
-        )
+                grapher = eda_graphing.XForce_Grapher()
 
-    if db_option != "ALL":
-        db_option = db_option.lower()
+                if analyze_option == "Database Summary":
+                    display_image(col1, grapher.graph_db_summary(), "Database Summary")
+                elif analyze_option == "Keyword Frequency":
+                    display_image(col1, grapher.graph_keyword_freq(queries=["ALL"], sources=["ALL"]), "Keyword Frequency")
+                elif analyze_option == "Publish Frequency":
+                    display_image(col1, grapher.graph_pub_freq(queries=["ALL"], sources=["ALL"]), "Publish Frequency")
+                elif analyze_option == "Text Frequency":
+                    display_image(col1, grapher.graph_text_freq(queries=["ALL"], sources=["ALL"]), "Text Frequency")
+                elif analyze_option == "Network Co-Occurence":
+                    display_image(col1, grapher.graph_network_cooccurence(), "Network Co-Occurence")
+                elif analyze_option == "Bubble Map":
+                    display_image(col1, grapher.graph_bubble_map(), "Bubble Map")
+        else:
 
-    if analyze_option == "Database Summary":
-        with col1:
-            helper.st.image(grapher.graph_db_summary(), caption="Database Summary", use_column_width=True)
+            helper.st.warning("Please load a database in the \"Select\" tab before proceeding")
 
-    elif analyze_option == "Keyword Frequency":
-
-        query_input = col2.text_input("Queries (Ex. ALL) (Ex. radiation,metamaterials,etc)").replace(" ", "")
-        queries = [i.strip() for i in query_input.split(",")]
-
-        if query_input != "":
-            with col1:
-                helper.st.image(grapher.graph_keyword_freq(queries=queries, sources=[db_option]), caption="Keyword Frequency", use_column_width=True)
-                
-    elif analyze_option == "Publish Frequency":
-
-        query_input = col2.text_input("Queries (Ex. ALL) (Ex. radiation,metamaterials,etc)").strip()
-        queries = [i.strip() for i in query_input.split(",")]
-
-        if query_input != "":
-            with col1: 
-                helper.st.image(grapher.graph_pub_freq(queries=queries, sources=[db_option]), caption="Publish Frequency", use_column_width=True)
-
-    elif analyze_option == "Text Frequency":
-
-        query_input = col2.text_input("Queries (Ex. ALL) (Ex. radiation,metamaterials,etc)").strip()
-        queries = [i.strip() for i in query_input.split(",")]
-
-        if query_input != "":
-            with col1:
-                helper.st.image(grapher.graph_text_freq(queries=queries, sources=[db_option]), caption="Text Frequency", use_column_width=True)
-
-
-def load_matplotlib_style():
-    # Ensure default session state values
-    if 'matplotlib_style' not in helper.st.session_state:
-        helper.st.session_state['matplotlib_style'] = {}
-
-    # Apply style to Matplotlib
-    helper.plt.rcParams.update(helper.st.session_state['matplotlib_style'])
 
 
 def graph_profiles(col1, col2):
 
     with col1:
+
         helper.st.header('Customize Your Graph')
 
-        config_name = helper.st.text_input("Name your configuration", value="custom")
+        config_name = helper.st.text_input("Name your configuration")
 
         helper.st.subheader('Font')
         font_type = helper.st.selectbox('Select font type', options=['Arial', 'Times New Roman', 'Calibri'])
@@ -208,12 +316,10 @@ def graph_profiles(col1, col2):
 
         if helper.st.button('Save Configuration'):
             if config_name:
-                with open(f'../configurations/{config_name}.matplotlibrc', 'w') as f:
+                with open(f'../../configurations/{config_name}.matplotlibrc', 'w') as f:
                     for key, value in config.items():
                         f.write(f'{key}:{value}\n')
 
-                # Save the style to session state
-                helper.st.session_state['matplotlib_style'] = config
                 helper.st.success('Configuration saved successfully!')
             else:
                 helper.st.error('Please add a Configuration name.')
@@ -222,45 +328,41 @@ def graph_profiles(col1, col2):
 
         helper.st.header('Load Configuration')
         config_file = helper.st.file_uploader("Upload Configuration (.rc) File")
-        config_default = '../configurations/default.matplotlibrc'  # Default configuration
+        config_default = '../../configurations/default.matplotlibrc'  # Default configuration
 
-        # Initialize the session_state
-        if "config_file_path" not in helper.st.session_state:
-            helper.st.session_state.config_file_path = config_default
-            helper.st.session_state.default_config_shown = False
+        # Check if the session state has a custom configuration path
+        if session.config_path is None:
+            session.config_path = config_default
+            using_default = True
+        else:
+            using_default = False
 
         if config_file is not None:
-            config_file_path = helper.os.path.join('../configurations', config_file.name)
-            with open(config_file_path, 'wb') as f:
-                f.write(config_file.getbuffer())
-            helper.st.session_state.config_file_path = config_file_path
+            config_file_path = helper.os.path.join('../../configurations', config_file.name)
+            session.config_path = config_file_path
+            using_default = False
 
-        if helper.st.session_state.config_file_path == config_default and not helper.st.session_state.default_config_shown:
-            helper.st.session_state.default_config_shown = True
-        elif helper.st.session_state.config_file_path != config_default:
-            helper.st.session_state.default_config_shown = False
-
-        if helper.st.session_state.default_config_shown:
+        if using_default:
             helper.st.info(f'Currently using default configuration')
         else:
-            helper.st.info(f'Currently using configuration from file: {helper.st.session_state.config_file_path}')
+            helper.st.info(f'Currently using configuration from file: {helper.os.path.basename(session.config_path)}')
 
         try:
-            helper.plt.style.use(helper.st.session_state.config_file_path)
+            helper.plt.style.use(session.config_path)
             helper.st.success('Configuration loaded successfully!')
         except IOError:
-            helper.st.error(f'Could not find the style file {helper.st.session_state.config_file_path} in the configurations directory.')
+            helper.st.error(f'Could not find the style file {session.config_path} in the configurations directory.')
 
         # Display the configurations
-        with open(helper.st.session_state.config_file_path, 'r') as f:
+        with open(session.config_path, 'r') as f:
             config_content = f.read()
-
         file_details = {}
         for line in config_content.split('\n'):
             if line and ':' in line:
                 key, value = line.split(':')
-                file_details[key] = value
+                file_details[key] = value.strip()  # Removing leading/trailing whitespace
         helper.st.write(file_details)
+
 
 def feedback_help(col1):
 
@@ -271,60 +373,44 @@ def feedback_help(col1):
         email = helper.st.text_input(label="Email:")
         issue_type = helper.st.selectbox("Select Type:", options=["Help", "Feedback"])
         feedback = helper.st.text_area(label="Describe your suggestion/needed assistance:")
+        github_token = helper.st.text_input(label="Please enter your GitHub Token:")
         submit = helper.st.form_submit_button(label="Submit")
 
         if submit:
             helper.st.write(f"Thank you, {name}! We will get back to you shortly.")
 
-            token = 'github token'
-
             url = 'https://api.github.com/repos/kkakdugee/x-force/issues'  
             headers = {
-                'Authorization': f'token {token}',
+                'Authorization': f'token {github_token}',
                 'Accept': 'application/vnd.github+json',  
             }
             data = {
-                'title': f'Feedback from {name}',
-                'body': feedback,
-            }
-
-            token = 'github token'
-
-            url = 'https://api.github.com/repos/kkakdugee/x-force/issues'  
-            headers = {
-                'Authorization': f'token {token}',
-                'Accept': 'application/vnd.github+json',  
-            }
-            data = {
-                'title': f'Feedback from {name}',
+                'title': f'{issue_type} from {name}',
                 'body': feedback,
             }
 
             response = helper.requests.post(url, headers=headers, json=data)
 
 
->>>>>>> 7d2915ff87cdc153f459327ec7d9b3ce7274f07c
 def main():
 
     # Title of the web app
-    helper.st.title('X-Force NLP Visualizer')
+    helper.st.title('NLP Research Visualizer')
 
     # Create a sidebar with a selection box
     with helper.st.sidebar:
 
         option = helper.st.selectbox(
                 'Select from below:', 
-                ['Update Database', 'Analyze Database', 'Graph Configurations', 'Feedback / Help'])
+                ['Database', 'Analyze Database', 'Graph Configurations', 'Feedback / Help'])
 
-        if option == 'Update Database':
-            helper.st.write('This option will enable you to update the Database.')
+        if option == 'Configure & Update Database':
+            helper.st.write('This option will enable you to make configurations and update your Database.')
 
         elif option == 'Analyze Database':
-            load_matplotlib_style()
-            helper.st.write('This option will enable you to view visualizations of the Database.')
+            helper.st.write('This option will enable you to view visualizations of the selected Database.')
 
         elif option == 'Graph Configurations':
-            load_matplotlib_style()
             helper.st.write('This option will enable you to configure your graphs.')
 
         elif option == 'Feedback / Help':
@@ -342,19 +428,34 @@ def main():
         else:
             col2.subheader("Parameters")
 
-        if option == 'Update Database':
-            update_database(col1, col2)
 
-        elif option == 'Analyze Database':
-            analyze_database(col1, col2)
+    if option == 'Database':
+        database(col1, col2)
 
-        elif option == 'Graph Configurations':
-            graph_profiles(col1, col2)
+    elif option == 'Analyze Database':
+        analyze_database(col1, col2)
 
-        elif option == 'Feedback / Help':
-            feedback_help(col1)
+    elif option == 'Graph Configurations':
+        graph_profiles(col1, col2)
+
+    elif option == 'Feedback / Help':
+        feedback_help(col1)
 
 
 if __name__ == "__main__":
-    helper.st.set_page_config(page_title="NDV", layout="wide")
+
+    helper.st.set_page_config(page_title="NLP Research Viz", layout="wide")
+
+    session = helper.st.session_state
+
+    if "db_manager" not in session:
+        session.db_manager = db_functions.XForce_Database()
+    if "db_path" not in session:
+        session.db_path = None
+    if "db_selected" not in session:
+        session.db_selected = False
+
+    if "config_path" not in session:
+        session.config_path = None
+
     main()
