@@ -1,2 +1,2 @@
-enter your http proxy here
-enter your https proxy here
+http://130.163.13.200:8080
+https://130.163.13.200:8080
