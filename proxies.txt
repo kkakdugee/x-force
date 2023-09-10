@@ -1,2 +1,2 @@
-http://130.163.13.200:8080
-https://130.163.13.200:8080
+http://proxy.example.com:8080
+https://proxy.example.com:8080

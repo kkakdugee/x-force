@@ -176,81 +176,84 @@ def update_database(col1):
 def filter_database(col1):
     
     if session.db_selected:
-
-        working_len = len(session.db_working)
-
-        if working_len > 1:
-            working_len -= 1
-
-        start_row = helper.st.number_input("Start Row", min_value=0, max_value=len(session.db_working))
-        end_row = helper.st.number_input("End Row", min_value=start_row, max_value=len(session.db_working), value=len(session.db_working))
-        if helper.st.button("Filter Rows"):
-            session.db_manager.filter_curr_rows(start_row, end_row)
-            session.db_working = session.db_manager.get_current_working_db()
-
+        
+        # Row Filtering
+        with helper.st.expander("Row Filters"):
+            start_row = helper.st.number_input("Start Row", min_value=0, max_value=len(session.db_working))
+            end_row = helper.st.number_input("End Row", min_value=start_row, max_value=len(session.db_working), value=len(session.db_working))
+            if helper.st.button("Filter Rows"):
+                session.db_manager.filter_curr_rows(start_row, end_row)
+                session.db_working = session.db_manager.get_current_working_db()
+        
         # Source Filtering
-        sources = session.db_working["source"].unique().tolist()
-        sources.append("ALL")
-        selected_sources = helper.st.multiselect("Select Sources", sources, default=["ALL"])
-        if helper.st.button("Filter Sources"):
-            session.db_manager.filter_curr_source(selected_sources)
-            session.db_working = session.db_manager.get_current_working_db()
+        with helper.st.expander("Source Filters"):
+            sources = session.db_working["source"].unique().tolist()
+            sources.append("ALL")
+            selected_sources = helper.st.multiselect("Select Sources", sources, default=["ALL"])
+            if helper.st.button("Filter Sources"):
+                session.db_manager.filter_curr_source(selected_sources)
+                session.db_working = session.db_manager.get_current_working_db()
 
         # Query Filtering
-        queries = session.db_working["query"].unique().tolist()
-        queries.append("ALL")
-        selected_queries = helper.st.multiselect("Select Queries", queries, default=["ALL"])
-        if helper.st.button("Filter Queries"):
-            session.db_manager.filter_curr_query(selected_queries)
-            session.db_working = session.db_manager.get_current_working_db()
-
+        with helper.st.expander("Query Filters"):
+            queries = session.db_working["query"].unique().tolist()
+            queries.append("ALL")
+            selected_queries = helper.st.multiselect("Select Queries", queries, default=["ALL"])
+            if helper.st.button("Filter Queries"):
+                session.db_manager.filter_curr_query(selected_queries)
+                session.db_working = session.db_manager.get_current_working_db()
+                
         # Title Filtering
-        title_values = helper.st.text_input("Title Values (comma-separated)")
-        title_and_or_condition = helper.st.selectbox("Title Condition", ["AND", "OR"], index=0)
-        if helper.st.button("Filter Titles"):
-            session.db_manager.filter_curr_title(title_values.split(','), 0 if title_and_or_condition == "AND" else 1)
-
+        with helper.st.expander("Title Filters"):
+            title_values = helper.st.text_input("Title Values (comma-separated)")
+            title_and_or_condition = helper.st.selectbox("Title Condition", ["AND", "OR"], index=0)
+            if helper.st.button("Filter Titles"):
+                session.db_manager.filter_curr_title(title_values.split(','), 0 if title_and_or_condition == "AND" else 1)
+        
         # Abstract Filtering
-        abstract_values = helper.st.text_input("Abstract Values (comma-separated)")
-        abstract_and_or_condition = helper.st.selectbox("Abstract Condition", ["AND", "OR"], index=0)
-        if helper.st.button("Filter Abstracts"):
-            session.db_manager.filter_curr_abstract(abstract_values.split(','), 0 if abstract_and_or_condition == "AND" else 1)
-            session.db_working = session.db_manager.get_current_working_db()
-
+        with helper.st.expander("Abstract Filters"):
+            abstract_values = helper.st.text_input("Abstract Values (comma-separated)")
+            abstract_and_or_condition = helper.st.selectbox("Abstract Condition", ["AND", "OR"], index=0)
+            if helper.st.button("Filter Abstracts"):
+                session.db_manager.filter_curr_abstract(abstract_values.split(','), 0 if abstract_and_or_condition == "AND" else 1)
+                session.db_working = session.db_manager.get_current_working_db()
+                
         # Author Filtering
-        author_values = helper.st.text_input("Author Values (comma-separated)")
-        author_and_or_condition = helper.st.selectbox("Author Condition", ["AND", "OR"], index=0)
-        if helper.st.button("Filter Authors"):
-            session.db_manager.filter_curr_author(author_values.split(','), 0 if author_and_or_condition == "AND" else 1)
-            session.db_working = session.db_manager.get_current_working_db()
-
-        # Date Filtering 
-        start_date = helper.st.date_input("Start Date")
-        end_date = helper.st.date_input("End Date")
-        if helper.st.button("Filter Dates"):
-            session.db_manager.filter_curr_date(start_date, end_date)
-            session.db_working = session.db_manager.get_current_working_db()
-
+        with helper.st.expander("Author Filters"):
+            author_values = helper.st.text_input("Author Values (comma-separated)")
+            author_and_or_condition = helper.st.selectbox("Author Condition", ["AND", "OR"], index=0)
+            if helper.st.button("Filter Authors"):
+                session.db_manager.filter_curr_author(author_values.split(','), 0 if author_and_or_condition == "AND" else 1)
+                session.db_working = session.db_manager.get_current_working_db()
+        
+        # Date Filtering
+        with helper.st.expander("Date Filters"):
+            start_date = helper.st.date_input("Start Date")
+            end_date = helper.st.date_input("End Date")
+            if helper.st.button("Filter Dates"):
+                session.db_manager.filter_curr_date(start_date, end_date)
+                session.db_working = session.db_manager.get_current_working_db()
+                
         # Sorting
-        sort_on = helper.st.selectbox("Sort On", session.db_working.columns.tolist())
-        is_ascending = helper.st.checkbox("Ascending Order")
-        if helper.st.button("Sort"):
-            session.db_manager.sort_curr_db(sort_on, is_ascending)
-            session.db_working = session.db_manager.get_current_working_db()
-
-        # Reset Filters
+        with helper.st.expander("Sorting Options"):
+            sort_on = helper.st.selectbox("Sort On", session.db_working.columns.tolist())
+            is_ascending = helper.st.checkbox("Ascending Order")
+            if helper.st.button("Sort"):
+                session.db_manager.sort_curr_db(sort_on, is_ascending)
+                session.db_working = session.db_manager.get_current_working_db()
+                
+        # Reset Filters and Confirm Changes
         if helper.st.button("Clear Filters"):
             session.db_manager.clear_curr_db_filters()
             session.db_working = session.db_manager.get_current_working_db()
-
+            
         if helper.st.button("Confirm"):
             session.db_manager.confirm_db()
             session.db_working = session.db_manager.get_current_working_db()
-
+        
         display_database(col1)
 
     else:
-
         helper.st.warning("Please load a database in the \"Select\" tab before proceeding")
 
 def database(col1, col2):
