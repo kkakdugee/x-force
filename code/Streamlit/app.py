@@ -301,8 +301,8 @@ def analyze_database(col1, col2):
                     display_image(col1, grapher.graph_pub_freq(queries=["ALL"], sources=["ALL"]), "Publish Frequency")
                 elif analyze_option == "Text Frequency":
                     display_image(col1, grapher.graph_text_freq(queries=["ALL"], sources=["ALL"]), "Text Frequency")
-                elif analyze_option == "Network Co-Occurence":
-                    display_image(col1, grapher.graph_network_cooccurence(), "Network Co-Occurence")
+                elif analyze_option == "Network Co-Occurrence":
+                    display_image(col1, grapher.graph_network_cooccurence(), "Network Co-Occurrence")
                 elif analyze_option == "Bubble Map":
                     display_image(col1, grapher.graph_bubble_map(), "Bubble Map")
         else:

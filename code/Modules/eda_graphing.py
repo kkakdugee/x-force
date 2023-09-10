@@ -507,7 +507,7 @@ class XForce_Grapher():
 
         return f"../../images/keyword_freq/keyword_freq_{'_'.join(title_sources)}_{'_'.join(title_queries)}.png"
 
-    def graph_network_cooccurence(self, n: int=50, annotation_threshold: float=0.05) -> None:
+    def graph_network_cooccurrence(self, n: int=50, annotation_threshold: float=0.05) -> None:
         """
         # TODO: currently only works with demo_db.csv loaded due to eval inconsistency
         # n = number of top keywords per query
