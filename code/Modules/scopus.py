@@ -46,7 +46,7 @@ def parse_data(data, query) -> helper.List[helper.Dict[str, str]]:
         published = field.get('prism:coverDate', 'N/A')
         pii = field.get('pii', "N/A")
         url = 'https://www.sciencedirect.com/science/article/abs/pii/' + str(pii)
-        abstract = scopus_scraper.get_abstract(url) # field.get("dc:description", "N/A")
+        abstract = field.get("dc:description", "N/A") # scopus_scraper.get_abstract(url)
         affiliation_data = field.get('affiliation', [{}])[0]
         country = affiliation_data.get('affiliation-country', 'N/A')
         school = affiliation_data.get('affilname', 'N/A')
