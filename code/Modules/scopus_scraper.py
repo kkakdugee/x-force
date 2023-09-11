@@ -15,7 +15,7 @@ def get_abstract(url) -> str:
 
     proxies = {
         'http':'http://130.163.13.200:8080',
-        'https':'http://130.163.13.200'
+        'https':'http://130.163.13.200:8080'
     }
 
     # Set headers to mimic a browser

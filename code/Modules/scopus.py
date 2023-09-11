@@ -16,13 +16,18 @@ helper.load_dotenv() # load environment variables
 
 # API key from environment variable
 API_KEY = helper.os.getenv('SCOPUS_API_KEY')
+
+# Institution Token from environment variable
+INST_TOKEN = helper.os.getenv('SCOPUS_INST_TOKEN')
+
 # Scopus API url
 SCOPUS_URL = 'https://api.elsevier.com/content/search/scopus'
 
 # Headers for the API request
 HEADERS = {
     'Accept': 'application/json',
-    'X-ELS-APIKey': API_KEY
+    'X-ELS-APIKey': API_KEY,
+    'X-ELS-Insttoken': INST_TOKEN
 }
 
 # Function to parse data received from API
@@ -41,7 +46,7 @@ def parse_data(data, query) -> helper.List[helper.Dict[str, str]]:
         published = field.get('prism:coverDate', 'N/A')
         pii = field.get('pii', "N/A")
         url = 'https://www.sciencedirect.com/science/article/abs/pii/' + str(pii)
-        abstract = scopus_scraper.get_abstract(url) # field.get("dc:description", "N/A")
+        abstract = field.get("dc:description", "N/A") # scopus_scraper.get_abstract(url)
         affiliation_data = field.get('affiliation', [{}])[0]
         country = affiliation_data.get('affiliation-country', 'N/A')
         school = affiliation_data.get('affilname', 'N/A')

@@ -34,9 +34,7 @@ If you don't have `git` installed or if you prefer to download the files manuall
 ### Step 2: Set your proxies, if necessary
 Locate `proxies.txt` in the project root folder and input your proxies. Here is an example below:
 
-`http://proxy.example.com:8080`
-
-`https://proxy.example.com:200`
+![Proxy Config File](./images/readme/Proxy%20Config%20File.png)
 
 _Note: The first line is your HTTP proxy and the second line is your HTTPS proxy._
 
@@ -61,10 +59,15 @@ This section will guide you through the process of using X-Force NLP Visualizer'
 
 2. **Selecting & Creating a Database:** This tab allows you to load a pre-existing Database, or create a new Database.
 
+![Database Loading & Preview](./images/readme/Database%20Selection%20Interface.png)
+
 3. **Updating the Database:** This tab allows you to add entries by query to your selected Database.
+
+![Updating the Database](./images/readme/Updating%20Database%20Interface.png)
 
 4. **Filtering the Database:** This tab allows you to filter your selected Database.
 
+![Filtering Database](./images/readme/Filtering%20Database%20Interface.png)
 
 ---
 
@@ -72,7 +75,7 @@ This section will guide you through the process of using X-Force NLP Visualizer'
 
 ![Analyze DB Interface](./images/readme/Analyze%20Database%20Interface.png)
 
-The "Analyze Database" functionality offers four types of visualizations, each designed to help you better understand the distribution and frequency of specific keywords within your databases. These visualizations include:
+The "Analyze Database" functionality offers six types of visualizations, each designed to help you better understand the distribution and frequency of specific keywords within your databases. These visualizations include:
 
 1. **Database Summary:** The "Database Summary" generates a graph showing the distribution of articles among the Scopus, arXiv, and both databases.
 
@@ -80,7 +83,11 @@ The "Analyze Database" functionality offers four types of visualizations, each d
 
  3. **Publish Frequency:** The "Publish Frequency" visualization creates a graph showing the publishing frequency of your filtered queries from the selected database.
 
-4. **Text Frequency:** The "Text Frequency" visualization constructs a graph showing the text frequency (e.g., character/word count of title/abstract) of filtered queries from the selected database.
+4. **Text Frequency:** The "Text Frequency" visualization generates a graph showing the text frequency (e.g., character/word count of title/abstract) of filtered queries from the selected database.
+
+5. **Network Co-occurrence:** The "Network Co-occurrence" visualization generates a graph that displays the relationships between different keywords or terms based on their co-occurrence within the same documents.
+
+6. **Bubble Map:** The "Bubble Map" visualization generates a graph where data is represented as bubbles or circles. The size of the bubbles typically corresponds to the frequency or importance of a keyword, indicating the density of that term within the dataset.
 
 
 ---

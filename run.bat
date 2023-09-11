@@ -1,4 +1,5 @@
 @echo off
+setlocal EnableDelayedExpansion
 
 :: Ask the user if they would like to use proxies
 echo Would you like to use proxies? (y/n)
@@ -12,8 +13,8 @@ if %errorlevel%==1 (
             set /p=
             set /p https_proxy=
         )
-        echo HTTP proxy settings have been applied: %http_proxy%
-        echo HTTPS proxy settings have been applied: %https_proxy%
+        echo HTTP proxy settings have been applied: !http_proxy!
+        echo HTTPS proxy settings have been applied: !https_proxy!
     ) else (
         echo proxies.txt not found. No proxy settings applied.
     )
