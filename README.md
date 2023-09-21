@@ -38,7 +38,12 @@ Locate `proxies.txt` in the project root folder and input your proxies. Here is 
 
 _Note: The first line is your HTTP proxy and the second line is your HTTPS proxy._
 
-### Step 3: Run the Executable
+### Step 3: Set your SCOPUS API key and Institution Token
+Locate `.env` in the project root folder and input your proxies. Here is an example below:
+
+![SCOPUS env File](./images/readme/SCOPUS%20env%20File.png)
+
+### Step 4: Run the Executable
 Locate the batch file in the root directory of the project (it should be named `run.bat`). Run this file by  double-clicking it. This executable file will set your proxies, verify your Python installation, handle the installation of necessary dependencies automatically, and start the NLP Research Visualizer software tool.
 
 ---
